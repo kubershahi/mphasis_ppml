@@ -1,5 +1,5 @@
-#ifndef READ_DATA_H
-#define READ_DATA_H
+#ifndef READ_DATA_HPP
+#define READ_DATA_HPP
 
 vector< vector<float> > read_data(void);
 
