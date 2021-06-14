@@ -5,8 +5,9 @@ using namespace std;
 using namespace Eigen;
 
 /*
-====================================
+// ==================================== 
 Goals:
+// ==================================== 
 - Additive Secret Sharing [done]
 - Adding shares [done]
 - Multiplying shares using triplets [done]
@@ -39,7 +40,7 @@ Dimensions:
 // ==================================== 
 int N = 6; //6
 int d = 5; //5
-int B = 3; //3
+int B = 6; //3
 int NUM_EPOCHS = 1; // change; shuffle order
 // ====================================
 
@@ -56,7 +57,10 @@ MatrixXi rec(MatrixXi A, MatrixXi B)
 }
 
 MatrixXi mult(int i, MatrixXi A, MatrixXi B, MatrixXi E, MatrixXi F, MatrixXi Z)
-{
+{ 
+  //MatrixXi pp = E*F + U*F + E*V + Z;
+  //MatrixXi pp = -E*F + X*F + E*w + Z;
+  //MatrixXi pp = E*F + X*F + E*w + Z; //--> doesn't work (SecureML)
 	MatrixXi product = MatrixXi::Random(Z.rows(),Z.cols());
 	if (i == 1) product = -(E * F) + (A * F) + (E * B) + Z;
 	else if (i == 0) product = (A * F) + (E * B) + Z;
@@ -66,15 +70,10 @@ MatrixXi mult(int i, MatrixXi A, MatrixXi B, MatrixXi E, MatrixXi F, MatrixXi Z)
 
 MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
 { 
-  MatrixXi shares[2];
-  //MatrixXi w = MatrixXi::Random(5,1) / 10000000;
-  share(w, shares);
-	MatrixXi w_0 = shares[0];
-  MatrixXi w_1 = shares[1];
-
+  // ===========================
   // Additive Secret Sharing
   // ===========================
-  
+  MatrixXi shares[2];
 
   share(X, shares); // training data shares
   MatrixXi X_0 = shares[0];
@@ -82,9 +81,12 @@ MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
   share(Y, shares); // label shares
   MatrixXi Y_0 = shares[0];
   MatrixXi Y_1 = shares[1];
-  // ===========================
+  share(w, shares); // weight shares
+  MatrixXi w_0 = shares[0];
+  MatrixXi w_1 = shares[1];
 
-  // Masking
+  // ===========================
+  // Triplet Generation (Offline Phase)
   // ===========================
   MatrixXi U = MatrixXi::Random(X.rows(),X.cols()) / 10000000; // masks X_i
   share(U, shares);
@@ -94,10 +96,6 @@ MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
   MatrixXi E_0 = X_0 - U_0;
   MatrixXi E_1 = X_1 - U_1;
   MatrixXi E = rec(E_0, E_1); // masked X_i
-
-  //cout << "Here is the matrix U + E:\n" << U + E <<endl; // sanity check, must = X
-
-  // =================================================================================
 
   int t = (N * NUM_EPOCHS)/B; // E = 1
 
@@ -130,18 +128,12 @@ MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
   share(ZZ, shares);
   MatrixXi ZZ_0 = shares[0];
   MatrixXi ZZ_1 = shares[1];
-// =========================== 
-  
+
+  // ===========================
+  // Online Phase
+  // ===========================
   for(int j = 0; j < t; j ++)
   {
-    // In each iteration:
-    /* 
-    - Use E_B_j instead of E [done]
-    - Use V[j] instead of V [done]
-    - Use VV[j] instead of VV [done]
-    - Recalculate Z, ZZ [done]
-
-    */
 
     MatrixXi F_0 = w_0 - V_0.col(j);
     MatrixXi F_1 = w_1 - V_1.col(j);
@@ -165,11 +157,12 @@ MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
 
     // Truncation
     // =========================== 
+    // To be added
     // =========================== 
 
     // delta = X^T(X.w - Y)
-    w_0 = w_0 - (delta_0 / 128); // alpha/b = 2^-7 = 128; used in paper
-    w_1 = w_1 - (delta_1 / 128); // alpha/b = 2^-7 = 128; used in paper
+    w_0 = w_0 - (delta_0 / (B * 100)); // alpha/b = 2^-7 = 128; used in paper
+    w_1 = w_1 - (delta_1 / (B * 100)); // alpha/b = 2^-7 = 128; used in paper
   }
 
   return rec(w_0, w_1);
@@ -177,69 +170,41 @@ MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
 
 MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w) // ideal functionality
 {
-  // w -= a/|B| X^T (X.w - Y)
+  // w -= a/|B| X^T .(X.w - Y)
   int t = (N * NUM_EPOCHS)/B; // E = 1
   for(int i = 0; i < t; i ++)
   {
     MatrixXi YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
     MatrixXi D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
     MatrixXi delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
-    w = w - (delta / 128); // w -= a/B * delta
+    w = w - (delta / (B * 100)); // w -= a/B * delta
   }
-  
   return w;
 }
+
+MatrixXi predict(MatrixXi X, MatrixXi w)
+{ return X * w;}
 
 int main()
 {
   MatrixXi X = MatrixXi::Random(N,d) / 10000000; // n = 6, d = 5, training samples
-  //cout << "Here is the matrix X:\n" << X <<endl;
-  //cout << "Here is the 1st col in X:\n" << X.col(1) <<endl;
-  //out << "Here is the matrix X_B_1:\n" << X.block(0 * B,0,B,X.cols()) <<endl;
-  //cout << "Here is the matrix X_B_2:\n" << X.block(1 * B,0,B,d) <<endl;
-  //cout << "Here is the matrix X_B_3:\n" << X.block(2 * B,0,B,d) <<endl;
-  //cout << "Here is the matrix X^T:\n" << X.transpose() <<endl;
-  //cout << "Here is the matrix X^T_B_1:\n" << X.transpose().block(0,0 * B,X.cols(),B) <<endl;
-  //cout << "Here is the matrix X^T_B_2:\n" << X.transpose().block(0,1 * B,X.cols(),B) <<endl;
-  //cout << "Here is the matrix X^T_B_3:\n" << X.transpose().block(0,2 * B,X.cols(),B) <<endl;
-
-
+  cout << "Here is the matrix X:\n" << X <<endl;
   MatrixXi Y = MatrixXi::Random(N,1) / 10000000; // labels
   cout << "Here is the matrix Y:\n" << Y <<endl;
-  MatrixXi w = MatrixXi::Random(d,1) / 10000000;
-
-  //int t = N * NUM_EPOCHS / B;
-
-  //MatrixXi U = MatrixXi::Random(N,d) / 100000000; 
-  //cout << "Here is the matrix U:\n" << U <<endl;
-  //MatrixXi V = MatrixXi::Random(d,t) / 100000000; 
-  //cout << "Here is the matrix V:\n" << V <<endl;
-  //MatrixXi VV = MatrixXi::Random(B,t) / 100000000;
-  //MatrixXi Z = MatrixXi::Zero(B,t); 
-  //MatrixXi ZZ = MatrixXi::Zero(d,t); 
-  
-  //for (int z = 0; z < Z.cols(); z++)
-  //{
-  //  Z.col(z) = U.block(z * B,0,B,X.cols()) * V.col(z);
-  //}
-
-  //for (int z = 0; z < ZZ.cols(); z++)
-  //{
-  //  ZZ.col(z) = U.transpose().block(0,z * B,X.cols(),B) * VV.col(z);
-  //}
-
-  //cout << "Here is the matrix Z:\n" << Z <<endl;
+  MatrixXi w = MatrixXi::Random(d,1) / 100000000;
 
   MatrixXi new_w = linearRegression(X,Y,w);
   cout << "Final weights (under Privacy Preserving) are:\n" << new_w <<endl;
   MatrixXi ideal_w = idealLinearRegression(X,Y,w);
   cout << "Final weights (under Ideal Functionality) are:\n" << ideal_w <<endl;
+
+  //MatrixXi pred = predict(X,w);
+  //cout << "Predictions using trained weights are:\n" << pred <<endl;
+
 }
 
 void verify()
 {
-  // Additive Secret Sharing
-
   /*
 
   MatrixXi shares[2];
@@ -299,9 +264,5 @@ void verify()
 
   */
 }
-
-//MatrixXi pp = E*F + U*F + E*V + Z;
-//MatrixXi pp = -E*F + X*F + E*w + Z;
-//MatrixXi pp = E*F + X*F + E*w + Z; //--> doesn't work (SecureML)
 
 
