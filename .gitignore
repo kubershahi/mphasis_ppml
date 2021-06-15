@@ -133,3 +133,6 @@ dmypy.json
 
 #VS_Code
 .vscode
+
+#mnist
+/datasets/mnist
