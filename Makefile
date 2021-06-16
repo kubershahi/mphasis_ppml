@@ -7,14 +7,14 @@
 CC = g++
 # CFLAGS  = -g -Wall
 
-all:  read_data.o data.o 
-	$(CC) $(CFLAGS) read_data.o data.o -o data
+all:  read_data.o main.o 
+	$(CC) $(CFLAGS) read_data.o main.o -o data
 
 read_data.o:	read_data.cpp read_data.hpp
 	$(CC) $(CFLAGS) -c read_data.cpp
 
-data.o:	data.cpp read_data.hpp
-	$(CC) $(CFLAGS) -c data.cpp
+main.o:	main.cpp read_data.hpp
+	$(CC) $(CFLAGS) -c main.cpp
 
 # To start over from scratch, type 'make clean'. This removes the executable file, 
 # as well as old .o objectfiles and *~ backup files:

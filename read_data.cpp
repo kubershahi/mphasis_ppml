@@ -82,7 +82,7 @@ void read_data(string inputfile, vector< vector<float> > &X, vector< float> &Y) 
   string line;                      // declaring a string to hold the read line of the input file
 
   if (fin.is_open()) {              // if the input file is open
-    cout << "File open successfully" << endl; 
+    cout << "File opened successfully " << endl; 
 
     while (getline(fin, line)){     // storing the line of input file on the variable line
       l++;                          // increasing the line read counter
@@ -114,7 +114,7 @@ void read_data(string inputfile, vector< vector<float> > &X, vector< float> &Y) 
       X.push_back(row);                     // pushing the row into the dataset
       row.clear();                                // clearing the row vector to store the next row
     }
-    cout << l << endl;                            // displaying the number or lines reads from the input file
+    cout << "Lines read successfully: " << l << endl;                            // displaying the number or lines reads from the input file
   }
   else{
     cout << "Unable to open the specified file " << endl; // output if file can't be opened

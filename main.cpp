@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Eigen/Dense>
- 
+#include "read_data.hpp"
+
 using namespace std;
 using namespace Eigen;
 
@@ -185,8 +186,23 @@ MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w) // ideal func
 MatrixXi predict(MatrixXi X, MatrixXi w)
 { return X * w;}
 
-int main()
-{
+int main(){
+
+  // loading mnist dataset: training and testing portion separately
+  vector<vector<float> > X_train;   // dim: 60000 x 784, 60000 training samples with 784 features
+  vector<float> Y_train;            // dim: 60000 x 1  , the true label of each training sample
+  read_data("datasets/mnist/mnist_train.csv", X_train, Y_train);
+
+  cout << X_train.size() << endl;
+  cout << Y_train.size() << endl;
+
+  vector<vector<float> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
+  vector<float> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
+  read_data("datasets/mnist/mnist_test.csv", X_test, Y_test);
+
+  cout << X_test.size() << endl;
+  cout << Y_test.size() << endl;
+
   MatrixXi X = MatrixXi::Random(N,d) / 10000000; // n = 6, d = 5, training samples
   cout << "Here is the matrix X:\n" << X <<endl;
   MatrixXi Y = MatrixXi::Random(N,1) / 10000000; // labels
