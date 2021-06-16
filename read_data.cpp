@@ -16,12 +16,11 @@ Output: returns dataset, data in two-dimensional vector.
 using namespace std;
 
 // // function to read the medical insurance dataset
-// vector<vector<float> > read_data(string inputfile){
+// void read_data(string inputfile, vector<vector<float> > &X, vector<float> &Y){
   
 //   ifstream fin;                    // declaring the input filestream
 //   fin.open(inputfile);             // opening the file
 
-//   vector<vector<float> > dataset;  // declaring the 2D vector to hold the dataset
 //   vector<float> temp;              // declaring a temp vector to hold content of a row
 
 //   float age, sex, bmi, children, smoker, charges;  // declaring the six features of the dataset
@@ -41,7 +40,7 @@ using namespace std;
 //       istringstream temp_row(line);    // creating a string stream from the string line 
 
 //       temp_row >> age >> temp_sex >> bmi >> children >> temp_smoker >> charges; 
-                    // // strong the values in the string stream line in the appropriate variable
+//                     // strong the values in the string stream line in the appropriate variable
 
 //       temp.push_back(age);           // pushing the age value in the temp_row
 //       if (temp_sex == "male"){       // if the sex is male
@@ -60,25 +59,21 @@ using namespace std;
 //         smoker = 0;   //no           // else to a 1
 //       }
 //       temp.push_back(smoker);        // pushing smoker
-//       temp.push_back(charges);       // pushing the final insurance charges
-
-//       dataset.push_back(temp);       // pushing the row into the dataset 
-//       temp.clear();                  // clearing the temp to store the next line
+      
+//       Y.push_back(charges);       // pushing the final insurance charges as y_values
+//       X.push_back(temp);          // pushing the row into the dataset as x_values
+//       temp.clear();               // clearing the temp to store the next line
 //     }
 //     cout << l << endl;               // display the number of read lines
 //   }
 //   else{
 //     cout << "Unable to open the specified file " << endl;  // output if file can't be opened
 //   }
-
-//   return dataset;                    // return the dataset
 // }
 
 
 //function to read mnist dataset
-vector<vector<float> > read_data(string inputfile) {
-  
-  vector<vector<float> > dataset;   // declaring the 2D variable to hold the data
+void read_data(string inputfile, vector< vector<float> > &X, vector< float> &Y) {
 
   ifstream fin;                     // declaring the input file stream
   fin.open(inputfile);              // opening the inputfile
@@ -94,15 +89,21 @@ vector<vector<float> > read_data(string inputfile) {
       istringstream linestream(line); // converting the read line into an string stream
       vector<float> row;            // declaring a vector to store the current row
 
-      while (linestream) {         // while the string stream is read
+      int val = 0;                 // declaring a variable to track the number of values in a row
+      while (linestream) {         // while the string stream is not null
         string row_value;          // declaring a string to hold the row values
-        int val = 0;               // declaring a variable to track the number of values in a row
 
         if (!getline(linestream, row_value, ',')) // storing the values from stream into row_value one by one
           break;                                  // at the end of row break the while loop
-        try {                                     
-          row.push_back(stof(row_value));         // pushing the current value into the row
-          val++;
+        try { 
+          if (val < 784) {                                
+            row.push_back(stof(row_value));         // pushing the current value into the row for X values
+            val++;
+          }
+          else if (val == 784)                      // pushing the current value into the Y for y values
+          {
+            Y.push_back(stof(row_value));
+          }
         }
         catch (const invalid_argument err) {      // if there is a error catch the error and display it
           cout << "Invalid value found in the file: " << inputfile << " line: " << l << " value: " << val << endl;
@@ -110,7 +111,7 @@ vector<vector<float> > read_data(string inputfile) {
         }
       }
 
-      dataset.push_back(row);                     // pushing the row into the dataset
+      X.push_back(row);                     // pushing the row into the dataset
       row.clear();                                // clearing the row vector to store the next row
     }
     cout << l << endl;                            // displaying the number or lines reads from the input file
@@ -118,6 +119,4 @@ vector<vector<float> > read_data(string inputfile) {
   else{
     cout << "Unable to open the specified file " << endl; // output if file can't be opened
   }
-
-  return dataset;                                 // return the dataset
-  }
+}

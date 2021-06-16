@@ -3,6 +3,6 @@
 
 #include<vector>
 
-std::vector< std::vector<float> > read_data(std::string inputfile);
+void read_data(std::string inputfile, std::vector<std::vector<float> > &X, std::vector<float> &Y);
 
 #endif

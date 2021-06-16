@@ -12,23 +12,30 @@ using namespace std;
 
 */
 int main() {
-  vector<vector<float> > dataset = read_data("datasets/mnist/mnist_test.csv");
 
-  // for (int j = 0; j < 10; j++ ){
-  //   cout << dataset[j][0]<< " " << dataset[j][1] << " " << dataset[j][2] << " " <<dataset[j][3] << " " << dataset[j][4] << " " << dataset[j][5] << endl;
+  vector<vector<float> > X;
+  vector<float > Y;
+  // read_data("datasets/medical_cost/insurance.csv", X, Y);
+  read_data("datasets/mnist/mnist_test.csv", X, Y);
+
+  // cout << X[1][0]<< " " << X[1][1] << " " << X[1][2] << " " <<X[1][3] << " " << X[1][4] << endl;
+
+  //splitting dataset 
+  // int size = 10;
+  // vector<vector<float> > X(X.begin(), X.begin() + size);
+  // cout << X.size() << endl;
+  // cout << X[1][0]<< " " << X[1][1] << " " << X[1][2] << " " <<X[1][3] << " " << X[1][4] << endl;
+
+  // for (int i = 0; i <X.size(); i++){
+  //   cout << i << ": " << X[0][i] << endl;
   // }
 
-//splittin dataset
-  // int size = 10;
-  // vector<vector<float> > train_X(dataset.begin(), dataset.begin() + size);
-  // cout << train_X.size() << endl;
-  // cout << train_X[1][0]<< " " << train_X[1][1] << " " << train_X[1][2] << " " <<train_X[1][3] << " " << train_X[1][4] << " " << train_X[1][5] << endl;
 
-  
-
-  for (int i = 0; i <785; i++){
-    cout << i << ": " << dataset[0][i] << endl;
+  for (int j = 0; j <100; j++){
+    cout << j << ": " << Y[j] << " ";
   }
-
-  cout << dataset.size() << endl;
+  cout << "\n";
+  cout << X[410][773] << endl;
+  cout << X.size() << endl;
+  cout << Y.size() << endl;
 }
