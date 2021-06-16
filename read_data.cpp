@@ -5,6 +5,7 @@
 #include <sstream>  // string stream operation: istringstream
 #include <algorithm>    // replace functionality
 #include "read_data.hpp"
+#include <Eigen/Dense>
 
 /* 
 
@@ -120,3 +121,6 @@ void read_data(string inputfile, vector< vector<float> > &X, vector< float> &Y) 
     cout << "Unable to open the specified file " << endl; // output if file can't be opened
   }
 }
+
+//function to read mnist dataset
+void read_data2(string inputfile, Eigen::MatrixXi &X, Eigen::MatrixXi &Y) {}

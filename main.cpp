@@ -41,7 +41,7 @@ Dimensions:
 // ==================================== 
 int N = 6; //6
 int d = 5; //5
-int B = 6; //3
+int B = 100; //3
 int NUM_EPOCHS = 1; // change; shuffle order
 // ====================================
 
@@ -169,6 +169,20 @@ MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
   return rec(w_0, w_1);
 }
 
+MatrixXf idealLinearRegression(MatrixXf X, MatrixXf Y, MatrixXf w) // ideal functionality
+{
+  // w -= a/|B| X^T .(X.w - Y)
+  int t = (N * NUM_EPOCHS)/B; // E = 1
+  for(int i = 0; i < t; i ++)
+  {
+    MatrixXf YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
+    MatrixXf D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
+    MatrixXf delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
+    w = w - (delta / (B * 100)); // w -= a/B * delta
+  }
+  return w;
+}
+
 MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w) // ideal functionality
 {
   // w -= a/|B| X^T .(X.w - Y)
@@ -183,38 +197,65 @@ MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w) // ideal func
   return w;
 }
 
+MatrixXf predict(MatrixXf X, MatrixXf w)
+{ return X * w;}
+
 MatrixXi predict(MatrixXi X, MatrixXi w)
 { return X * w;}
 
 int main(){
+
+  cout<<"Reading Data:"<<endl;
 
   // loading mnist dataset: training and testing portion separately
   vector<vector<float> > X_train;   // dim: 60000 x 784, 60000 training samples with 784 features
   vector<float> Y_train;            // dim: 60000 x 1  , the true label of each training sample
   read_data("datasets/mnist/mnist_train.csv", X_train, Y_train);
 
-  cout << X_train.size() << endl;
-  cout << Y_train.size() << endl;
 
-  vector<vector<float> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
-  vector<float> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
-  read_data("datasets/mnist/mnist_test.csv", X_test, Y_test);
+  MatrixXf X1(1000, 784);
+  MatrixXf Y1(1000, 1);
 
-  cout << X_test.size() << endl;
-  cout << Y_test.size() << endl;
+  for (int i = 0; i < 1000; i++)
+  {
+    X1.row(i) = VectorXf::Map(&X_train[i][0],X_train[i].size());
+    Y1.row(i) = VectorXf::Map(&Y_train[i],1);
+  }
+
+
+  //cout << "Here is Matrix X1:\n" << X1 <<endl;
+  //cout << "Here is Matrix Y1:\n" << Y1 <<endl;
+  
+  //X_train = X_train.block(0,0,d,N);
+  //Y_train = Y_train.block(0,0,d,N);
+
+  //cout << "X_train size: "<< X_train.size() << endl;
+  //cout << "Y_train size: "<<  Y_train.size() << endl;
+
+  //vector<vector<float> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
+  //vector<float> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
+  //read_data("datasets/mnist/mnist_test.csv", X_test, Y_test);
+
+  //X_test = X_test.block(0,0,d,N);
+  //Y_test = Y_test.block(0,0,d,N);
+
+  //cout << "X_test size: "<< X_test.size() << endl;
+  //cout << "Y_test size: "<< Y_test.size() << endl;
 
   MatrixXi X = MatrixXi::Random(N,d) / 10000000; // n = 6, d = 5, training samples
-  cout << "Here is the matrix X:\n" << X <<endl;
+  //cout << "Here is the matrix X:\n" << X <<endl;
   MatrixXi Y = MatrixXi::Random(N,1) / 10000000; // labels
-  cout << "Here is the matrix Y:\n" << Y <<endl;
+  //cout << "Here is the matrix Y:\n" << Y <<endl;
   MatrixXi w = MatrixXi::Random(d,1) / 100000000;
 
-  MatrixXi new_w = linearRegression(X,Y,w);
-  cout << "Final weights (under Privacy Preserving) are:\n" << new_w <<endl;
-  MatrixXi ideal_w = idealLinearRegression(X,Y,w);
+  //MatrixXi new_w = linearRegression(X,Y,w);
+  //cout << "Final weights (under Privacy Preserving) are:\n" << new_w <<endl;
+
+  MatrixXf w2 = MatrixXf::Random(784,1);
+  MatrixXf ideal_w = idealLinearRegression(X1,Y1,w2);
   cout << "Final weights (under Ideal Functionality) are:\n" << ideal_w <<endl;
 
-  //MatrixXi pred = predict(X,w);
+  MatrixXf pred = predict(X1,ideal_w);
   //cout << "Predictions using trained weights are:\n" << pred <<endl;
 
 }
