@@ -1,12 +1,10 @@
+#include <vector>   // for vector operations
+#include <string>   // for string operations
+#include <iostream> // input output operation: cout
+#include <fstream>  // file stream operation: ifstream
+#include <sstream>  // string stream operation: istringstream
+#include <algorithm>    // replace functionality
 #include "read_data.hpp"
-#include <iostream> //cout
-#include <fstream> //ifstream
-#include <sstream> //istringstream
-#include <vector>
-#include <string>
-#include <algorithm>
-
-using namespace std;
 
 /* 
 
@@ -15,107 +13,111 @@ Output: returns dataset, data in two-dimensional vector.
 
 */
 
-// function to read the medical insurance dataset
+using namespace std;
+
+// // function to read the medical insurance dataset
 // vector<vector<float> > read_data(string inputfile){
   
-//   ifstream fin;
-//   fin.open(inputfile);
+//   ifstream fin;                    // declaring the input filestream
+//   fin.open(inputfile);             // opening the file
 
-//   vector<vector<float> > dataset;
-//   vector<float> temp;
+//   vector<vector<float> > dataset;  // declaring the 2D vector to hold the dataset
+//   vector<float> temp;              // declaring a temp vector to hold content of a row
 
-//   float age, sex, bmi, children, smoker, charges;
-//   string temp_sex, temp_smoker;
+//   float age, sex, bmi, children, smoker, charges;  // declaring the six features of the dataset
+//   string temp_sex, temp_smoker;    // two features are in strings, needs to be converted
 
-//   string line;
+//   string line;                     // declaring a string to hold the content of a line in the dataset file
 
-//   int l = 0;
+//   int l = 0;                       // declaring a integer to count the number of line
 
-//   if(fin.is_open()){
+//   if(fin.is_open()){               // if the dataset file is open  
 //     cout << "File open successfully" << endl;
     
-//     while(getline(fin,line)){
-//       l++;
+//     while(getline(fin,line)){      // getting the content of a line in variable line
+//       l++;                         // increasing the line count
       
-//       replace(line.begin(), line.end(), ',', ' ');
-//       istringstream temp_row(line);
+//       replace(line.begin(), line.end(), ',', ' ');   // replacing the commas with whitespace in a line
+//       istringstream temp_row(line);    // creating a string stream from the string line 
 
-//       temp_row >> age >> temp_sex >> bmi >> children >> temp_smoker >> charges;
+//       temp_row >> age >> temp_sex >> bmi >> children >> temp_smoker >> charges; 
+                    // // strong the values in the string stream line in the appropriate variable
 
-//       temp.push_back(age);
-//       if (temp_sex == "male"){
-//         sex = 0; // male
+//       temp.push_back(age);           // pushing the age value in the temp_row
+//       if (temp_sex == "male"){       // if the sex is male
+//         sex = 0; // male             // setting sex to 0 
 //       }
 //       else {
-//         sex = 1; // female
+//         sex = 1; // female           // else 1
 //       }
-//       temp.push_back(sex);
-//       temp.push_back(bmi);
-//       temp.push_back(children);
-//       if (temp_smoker == "yes"){
-//         smoker = 1; //yes 
+//       temp.push_back(sex);           // pushing sex
+//       temp.push_back(bmi);           // pushing bmi 
+//       temp.push_back(children);      // pushing number of children
+//       if (temp_smoker == "yes"){     // if a smoker
+//         smoker = 1; //yes            // setting smoke to 1
 //       }
 //       else {
-//         smoker = 0;   //no
+//         smoker = 0;   //no           // else to a 1
 //       }
-//       temp.push_back(smoker);
-//       temp.push_back(charges);
+//       temp.push_back(smoker);        // pushing smoker
+//       temp.push_back(charges);       // pushing the final insurance charges
 
-//       dataset.push_back(temp);
-//       temp.clear();
+//       dataset.push_back(temp);       // pushing the row into the dataset 
+//       temp.clear();                  // clearing the temp to store the next line
 //     }
-//     cout << l << endl;
+//     cout << l << endl;               // display the number of read lines
 //   }
 //   else{
-//     cout << "Unable to open the specified file " << endl;
+//     cout << "Unable to open the specified file " << endl;  // output if file can't be opened
 //   }
 
-//   return dataset;
+//   return dataset;                    // return the dataset
 // }
 
 
 //function to read mnist dataset
 vector<vector<float> > read_data(string inputfile) {
-  vector<vector<float> > dataset;
+  
+  vector<vector<float> > dataset;   // declaring the 2D variable to hold the data
 
-  ifstream fin;
-  fin.open(inputfile);
+  ifstream fin;                     // declaring the input file stream
+  fin.open(inputfile);              // opening the inputfile
 
-  int l = 0;
-  string line;
+  int l = 0;                        // declaring a integer to track the number of line
+  string line;                      // declaring a string to hold the read line of the input file
 
-  if (fin.is_open()) {
-    cout << "File open successfully" << endl;
+  if (fin.is_open()) {              // if the input file is open
+    cout << "File open successfully" << endl; 
 
-    while (getline(fin, line)){
-      l++;
-      istringstream linestream(line);
-      vector<float> row;
+    while (getline(fin, line)){     // storing the line of input file on the variable line
+      l++;                          // increasing the line read counter
+      istringstream linestream(line); // converting the read line into an string stream
+      vector<float> row;            // declaring a vector to store the current row
 
-      while (linestream) {
-        string row_value;
-        int val = 0;
+      while (linestream) {         // while the string stream is read
+        string row_value;          // declaring a string to hold the row values
+        int val = 0;               // declaring a variable to track the number of values in a row
 
-        if (!getline(linestream, row_value, ','))
-          break;
-        try {
-          row.push_back(stof(row_value));
+        if (!getline(linestream, row_value, ',')) // storing the values from stream into row_value one by one
+          break;                                  // at the end of row break the while loop
+        try {                                     
+          row.push_back(stof(row_value));         // pushing the current value into the row
           val++;
         }
-        catch (const std::invalid_argument err) {
+        catch (const invalid_argument err) {      // if there is a error catch the error and display it
           cout << "Invalid value found in the file: " << inputfile << " line: " << l << " value: " << val << endl;
           err.what();
         }
       }
 
-      dataset.push_back(row);
-      row.clear();
+      dataset.push_back(row);                     // pushing the row into the dataset
+      row.clear();                                // clearing the row vector to store the next row
     }
-    cout << l << endl;
+    cout << l << endl;                            // displaying the number or lines reads from the input file
   }
   else{
-    cout << "Unable to open the specified file " << endl;
+    cout << "Unable to open the specified file " << endl; // output if file can't be opened
   }
 
-  return dataset;
+  return dataset;                                 // return the dataset
   }
