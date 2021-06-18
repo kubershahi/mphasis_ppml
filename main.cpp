@@ -39,8 +39,8 @@ Dimensions:
 // ====================================
 // Global Declarations: 
 // ==================================== 
-int N = 10000; //6
-int N_test = 1000;
+int N = 60000; //6
+int N_test = 10000;
 int d = 784; //5
 int B = 128; //3
 int NUM_EPOCHS = 5; // change; shuffle order
@@ -379,7 +379,7 @@ MatrixXf predict(MatrixXf X, MatrixXf Y, MatrixXf w)
   return pred;
 }
 
-MatrixXi predict(MatrixXi X, MatrixXi w)
+MatrixXf predict(MatrixXf X, MatrixXf w)
 { return X * w;}
 
 int main(){
@@ -399,7 +399,7 @@ int main(){
   for (int i = 0; i < N; i++)
   {
     X1.row(i) = VectorXf::Map(&X_train[i][0], d)/255.0; // VectorXf::Map(&X_train[i][0],X_train[i].size());
-    Y1.row(i) = VectorXf::Map(&Y_train[i],1)/255.0;
+    Y1.row(i) = VectorXf::Map(&Y_train[i],1);
   }
 
   vector<vector<float> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
@@ -412,7 +412,7 @@ int main(){
   for (int i = 0; i < N_test; i++)
   {
     X1_test.row(i) = VectorXf::Map(&X_test[i][0], d)/255.0;
-    Y1_test.row(i) = VectorXf::Map(&Y_test[i],1)/255.0;
+    Y1_test.row(i) = VectorXf::Map(&Y_test[i],1);
   }
 
   MatrixXf w1 = MatrixXf::Random(d,1);
@@ -473,6 +473,15 @@ int main(){
   cout << "==================================="<<endl<<endl;
   MatrixXf pred = predict(X1_test, Y1_test, new_w);
   //cout << pred <<endl;
+
+  cout << endl << "Single example prediction: " << endl;
+  cout << "True Label: " << Y1_test.row(11) << endl;
+
+  MatrixXf pred_i = predict(X1_test.row(11), ideal_w);
+  cout << "Ideal Prediction: " << pred_i <<endl;
+
+  MatrixXf pred_p = predict(X1_test.row(11), new_w);
+  cout << "PP Prediction: " << pred_p <<endl;
 
 }
 
