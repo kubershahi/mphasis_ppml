@@ -45,19 +45,19 @@ using namespace std;
 
 //       temp.push_back(age);           // pushing the age value in the temp_row
 //       if (temp_sex == "male"){       // if the sex is male
-//         sex = 0; // male             // setting sex to 0 
+//         sex = 0.0; // male             // setting sex to 0 
 //       }
 //       else {
-//         sex = 1; // female           // else 1
+//         sex = 1.0; // female           // else 1
 //       }
 //       temp.push_back(sex);           // pushing sex
 //       temp.push_back(bmi);           // pushing bmi 
 //       temp.push_back(children);      // pushing number of children
 //       if (temp_smoker == "yes"){     // if a smoker
-//         smoker = 1; //yes            // setting smoke to 1
+//         smoker = 1.0; //yes            // setting smoke to 1
 //       }
 //       else {
-//         smoker = 0;   //no           // else to a 1
+//         smoker = 0.0;   //no           // else to a 1
 //       }
 //       temp.push_back(smoker);        // pushing smoker
       
@@ -65,7 +65,7 @@ using namespace std;
 //       X.push_back(temp);          // pushing the row into the dataset as x_values
 //       temp.clear();               // clearing the temp to store the next line
 //     }
-//     cout << l << endl;               // display the number of read lines
+//     cout << "Lines read: " << l << endl;               // display the number of read lines
 //   }
 //   else{
 //     cout << "Unable to open the specified file " << endl;  // output if file can't be opened
