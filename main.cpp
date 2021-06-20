@@ -39,8 +39,8 @@ Dimensions:
 // ====================================
 // Global Declarations: 
 // ==================================== 
-int N = 60000; //6
-int N_test = 10000;
+int N = 10000; //6
+int N_test = 1000;
 int d = 784; //5
 int B = 128; //3
 int NUM_EPOCHS = 5; // change; shuffle order
@@ -61,7 +61,7 @@ void share(MatrixXi A, MatrixXi shares[])
 // For floating point inputs
 void share(MatrixXf A, MatrixXf shares[])
 {
-  MatrixXf A_0 = MatrixXf::Random(A.rows(),A.cols()) / 10000000;
+  MatrixXf A_0 = MatrixXf::Random(A.rows(),A.cols());
   shares[0] = A_0;
   shares[1] = A - A_0;
 }
@@ -232,7 +232,7 @@ MatrixXf linearRegression(MatrixXf X, MatrixXf Y, MatrixXf w)
   // ===========================
   // Triplet Generation (Offline Phase)
   // ===========================
-  MatrixXf U = MatrixXf::Random(X.rows(),X.cols()) / 10000000; // masks X_i
+  MatrixXf U = MatrixXf::Random(X.rows(),X.cols()); // masks X_i
   share(U, shares);
   MatrixXf U_0 = shares[0]; 
   MatrixXf U_1 = shares[1];
@@ -243,7 +243,7 @@ MatrixXf linearRegression(MatrixXf X, MatrixXf Y, MatrixXf w)
 
   int t = (N)/B; // E = 1
 
-  MatrixXf V = MatrixXf::Random(d, t) / 10000000; // masks w_i
+  MatrixXf V = MatrixXf::Random(d, t); // masks w_i
   share(V, shares);
   MatrixXf V_0 = shares[0]; 
   MatrixXf V_1 = shares[1];
@@ -258,7 +258,7 @@ MatrixXf linearRegression(MatrixXf X, MatrixXf Y, MatrixXf w)
   MatrixXf Z_0 = shares[0];
   MatrixXf Z_1 = shares[1];
 
-  MatrixXf VV = MatrixXf::Random(B,t) / 10000000; // masks D_i
+  MatrixXf VV = MatrixXf::Random(B,t); // masks D_i
   share(VV, shares);
   MatrixXf VV_0 = shares[0]; 
   MatrixXf VV_1 = shares[1];
@@ -399,7 +399,7 @@ int main(){
   for (int i = 0; i < N; i++)
   {
     X1.row(i) = VectorXf::Map(&X_train[i][0], d)/255.0; // VectorXf::Map(&X_train[i][0],X_train[i].size());
-    Y1.row(i) = VectorXf::Map(&Y_train[i],1);
+    Y1.row(i) = VectorXf::Map(&Y_train[i],1)/10.0;
   }
 
   vector<vector<float> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
@@ -412,7 +412,7 @@ int main(){
   for (int i = 0; i < N_test; i++)
   {
     X1_test.row(i) = VectorXf::Map(&X_test[i][0], d)/255.0;
-    Y1_test.row(i) = VectorXf::Map(&Y_test[i],1);
+    Y1_test.row(i) = VectorXf::Map(&Y_test[i],1)/10.0;
   }
 
   MatrixXf w1 = MatrixXf::Random(d,1);
@@ -463,10 +463,11 @@ int main(){
   MatrixXf new_w = linearRegression(X1,Y1,w1);
   //cout << "Final weights (under Privacy Preserving) are:\n" << new_w <<endl;
 
+
+
   //==========================================
   // MODEL PREDICTION:
   //==========================================
-
   
   cout << endl << "==================================="<<endl;
   cout << "PREDICTION (using trained weights):"<<endl;
@@ -474,14 +475,15 @@ int main(){
   MatrixXf pred = predict(X1_test, Y1_test, new_w);
   //cout << pred <<endl;
 
-  cout << endl << "Single example prediction: " << endl;
-  cout << "True Label: " << Y1_test.row(11) << endl;
+  cout << endl << "Single example predictions: " << endl;
 
-  MatrixXf pred_i = predict(X1_test.row(11), ideal_w);
-  cout << "Ideal Prediction: " << pred_i <<endl;
-
-  MatrixXf pred_p = predict(X1_test.row(11), new_w);
-  cout << "PP Prediction: " << pred_p <<endl;
+  for (int k = 123; k < 600; k += 100){
+    cout << "True Label: " << Y1_test.row(k) << endl;
+    MatrixXf pred_i = predict(X1_test.row(k), ideal_w);
+    cout << "Ideal Prediction: " << pred_i <<endl;
+    MatrixXf pred_p = predict(X1_test.row(k), new_w);
+    cout << "PP Prediction: " << pred_p <<endl;
+  }
 
 }
 
