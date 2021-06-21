@@ -59,9 +59,9 @@ void share(MatrixXi A, MatrixXi shares[])
 }
 
 // For floating point inputs
-void share(MatrixXf A, MatrixXf shares[])
+void share(MatrixXd A, MatrixXd shares[])
 {
-  MatrixXf A_0 = MatrixXf::Random(A.rows(),A.cols());
+  MatrixXd A_0 = MatrixXd::Random(A.rows(),A.cols());
   shares[0] = A_0;
   shares[1] = A - A_0;
 }
@@ -73,7 +73,7 @@ MatrixXi rec(MatrixXi A, MatrixXi B)
 }
 
 // For floating point inputs
-MatrixXf rec(MatrixXf A, MatrixXf B)
+MatrixXd rec(MatrixXd A, MatrixXd B)
 {
   return A + B;
 }
@@ -96,12 +96,12 @@ MatrixXi mult(int i, MatrixXi A, MatrixXi B, MatrixXi E, MatrixXi F, MatrixXi Z)
 }
 
 // For floating point inputs
-MatrixXf mult(int i, MatrixXf A, MatrixXf B, MatrixXf E, MatrixXf F, MatrixXf Z)
+MatrixXd mult(int i, MatrixXd A, MatrixXd B, MatrixXd E, MatrixXd F, MatrixXd Z)
 { 
   //MatrixXf pp = E*F + U*F + E*V + Z;
   //MatrixXf pp = -E*F + X*F + E*w + Z;
   //MatrixXf pp = E*F + X*F + E*w + Z; //--> doesn't work (SecureML)
-  MatrixXf product = MatrixXf::Random(Z.rows(),Z.cols());
+  MatrixXd product = MatrixXd::Random(Z.rows(),Z.cols());
   if (i == 1) product = -(E * F) + (A * F) + (E * B) + Z;
   else if (i == 0) product = (A * F) + (E * B) + Z;
   
@@ -213,65 +213,65 @@ MatrixXi linearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
 }
 
 // Linear Regression for floating point input
-MatrixXf linearRegression(MatrixXf X, MatrixXf Y, MatrixXf w)
+MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
 { 
   // ===========================
   // Additive Secret Sharing
   // ===========================
-  MatrixXf shares[2];
+  MatrixXd shares[2];
 
   share(X, shares); // training data shares
-  MatrixXf X_0 = shares[0];
-  MatrixXf X_1 = shares[1];
+  MatrixXd X_0 = shares[0];
+  MatrixXd X_1 = shares[1];
   share(Y, shares); // label shares
-  MatrixXf Y_0 = shares[0];
-  MatrixXf Y_1 = shares[1];
+  MatrixXd Y_0 = shares[0];
+  MatrixXd Y_1 = shares[1];
   share(w, shares); // weight shares
-  MatrixXf w_0 = shares[0];
-  MatrixXf w_1 = shares[1];
+  MatrixXd w_0 = shares[0];
+  MatrixXd w_1 = shares[1];
   // ===========================
   // Triplet Generation (Offline Phase)
   // ===========================
-  MatrixXf U = MatrixXf::Random(X.rows(),X.cols()); // masks X_i
+  MatrixXd U = MatrixXd::Random(X.rows(),X.cols()); // masks X_i
   share(U, shares);
-  MatrixXf U_0 = shares[0]; 
-  MatrixXf U_1 = shares[1];
+  MatrixXd U_0 = shares[0]; 
+  MatrixXd U_1 = shares[1];
 
-  MatrixXf E_0 = X_0 - U_0;
-  MatrixXf E_1 = X_1 - U_1;
-  MatrixXf E = rec(E_0, E_1); // masked X_i
+  MatrixXd E_0 = X_0 - U_0;
+  MatrixXd E_1 = X_1 - U_1;
+  MatrixXd E = rec(E_0, E_1); // masked X_i
 
   int t = (N)/B; // E = 1
 
-  MatrixXf V = MatrixXf::Random(d, t); // masks w_i
+  MatrixXd V = MatrixXd::Random(d, t); // masks w_i
   share(V, shares);
-  MatrixXf V_0 = shares[0]; 
-  MatrixXf V_1 = shares[1];
+  MatrixXd V_0 = shares[0]; 
+  MatrixXd V_1 = shares[1];
 
-  //MatrixXf Z = U * V; // third triplet for multiplication -> change for batchwise SGD
-  MatrixXf Z = MatrixXf::Zero(B,t); 
+  //MatrixXd Z = U * V; // third triplet for multiplication -> change for batchwise SGD
+  MatrixXd Z = MatrixXd::Zero(B,t); 
   for (int z = 0; z < Z.cols(); z++)
   {
     Z.col(z) = U.block(z * B,0,B,U.cols()) * V.col(z);
   }
   share(Z, shares);
-  MatrixXf Z_0 = shares[0];
-  MatrixXf Z_1 = shares[1];
+  MatrixXd Z_0 = shares[0];
+  MatrixXd Z_1 = shares[1];
 
-  MatrixXf VV = MatrixXf::Random(B,t); // masks D_i
+  MatrixXd VV = MatrixXd::Random(B,t); // masks D_i
   share(VV, shares);
-  MatrixXf VV_0 = shares[0]; 
-  MatrixXf VV_1 = shares[1];
+  MatrixXd VV_0 = shares[0]; 
+  MatrixXd VV_1 = shares[1];
 
-  //MatrixXf ZZ = U.transpose() * VV; // third triplet for multiplication -> change for batchwise SGD
-  MatrixXf ZZ = MatrixXf::Zero(d,t);
+  //MatrixXd ZZ = U.transpose() * VV; // third triplet for multiplication -> change for batchwise SGD
+  MatrixXd ZZ = MatrixXd::Zero(d,t);
   for (int z = 0; z < ZZ.cols(); z++)
   {
     ZZ.col(z) = U.transpose().block(0,z * B,U.cols(),B) * VV.col(z);
   }
   share(ZZ, shares);
-  MatrixXf ZZ_0 = shares[0];
-  MatrixXf ZZ_1 = shares[1];
+  MatrixXd ZZ_0 = shares[0];
+  MatrixXd ZZ_1 = shares[1];
 
   // ===========================
   // Online Phase
@@ -284,29 +284,29 @@ MatrixXf linearRegression(MatrixXf X, MatrixXf Y, MatrixXf w)
     for(int j = 0; j < int(N/B); j++)
     {
       cout<<"=";
-      MatrixXf F_0 = w_0 - V_0.col(j);
-      MatrixXf F_1 = w_1 - V_1.col(j);
-      MatrixXf F = rec(F_0, F_1);
+      MatrixXd F_0 = w_0 - V_0.col(j);
+      MatrixXd F_1 = w_1 - V_1.col(j);
+      MatrixXd F = rec(F_0, F_1);
 
       // YY = X_B_j.w
-      MatrixXf YY_0 = mult(0, X_0.block(B * j,0,B,X.cols()), w_0, E.block(B * j,0,B,X.cols()), F, Z_0.col(j));
-      MatrixXf YY_1 = mult(1, X_1.block(B * j,0,B,X.cols()), w_1, E.block(B * j,0,B,X.cols()), F, Z_1.col(j));
+      MatrixXd YY_0 = mult(0, X_0.block(B * j,0,B,X.cols()), w_0, E.block(B * j,0,B,X.cols()), F, Z_0.col(j));
+      MatrixXd YY_1 = mult(1, X_1.block(B * j,0,B,X.cols()), w_1, E.block(B * j,0,B,X.cols()), F, Z_1.col(j));
 
       // D = X.w - Y
-      MatrixXf D_0 = YY_0 - Y_0.block(B * j,0,B,Y.cols());
-      MatrixXf D_1 = YY_1 - Y_1.block(B * j,0,B,Y.cols());
+      MatrixXd D_0 = YY_0 - Y_0.block(B * j,0,B,Y.cols());
+      MatrixXd D_1 = YY_1 - Y_1.block(B * j,0,B,Y.cols());
 
       // Loss Computation (for testing only)
-      MatrixXf D = rec(D_0, D_1);
-      MatrixXf loss = D.transpose() * D;
+      MatrixXd D = rec(D_0, D_1);
+      MatrixXd loss = D.transpose() * D;
 
-      MatrixXf FF_0 = D_0 - VV_0.col(j);
-      MatrixXf FF_1 = D_1 - VV_1.col(j);
-      MatrixXf FF = rec(FF_0, FF_1);
+      MatrixXd FF_0 = D_0 - VV_0.col(j);
+      MatrixXd FF_1 = D_1 - VV_1.col(j);
+      MatrixXd FF = rec(FF_0, FF_1);
 
       // delta = X^T(X.w - Y)
-      MatrixXf delta_0 = mult(0, X_0.transpose().block(0,B * j,X.cols(),B), D_0, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_0.col(j));
-      MatrixXf delta_1 = mult(1, X_1.transpose().block(0,B * j,X.cols(),B), D_1, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_1.col(j));
+      MatrixXd delta_0 = mult(0, X_0.transpose().block(0,B * j,X.cols(),B), D_0, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_0.col(j));
+      MatrixXd delta_1 = mult(1, X_1.transpose().block(0,B * j,X.cols(),B), D_1, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_1.col(j));
 
       // Truncation
       // =========================== 
@@ -329,7 +329,7 @@ MatrixXf linearRegression(MatrixXf X, MatrixXf Y, MatrixXf w)
 }
 
 // Non-PP Linear Regression for floating point inputs
-MatrixXf idealLinearRegression(MatrixXf X, MatrixXf Y, MatrixXf w) // ideal functionality
+MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w) // ideal functionality
 {
   // w -= a/|B| X^T .(X.w - Y)
   //int t = (N * NUM_EPOCHS)/B; // E = 1
@@ -341,11 +341,11 @@ MatrixXf idealLinearRegression(MatrixXf X, MatrixXf Y, MatrixXf w) // ideal func
 
     for(int i = 0; i < int(N/B); i ++)
     { cout<<"=";
-      MatrixXf YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
-      MatrixXf D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
+      MatrixXd YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
+      MatrixXd D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
       // Loss Computation
-      MatrixXf loss = D.transpose() * D;
-      MatrixXf delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
+      MatrixXd loss = D.transpose() * D;
+      MatrixXd delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
       w = w - (delta / (B * 100)); // w -= a/B * delta
       //cout<<w<<endl;
       epoch_loss += loss(0,0);
@@ -371,15 +371,15 @@ MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w) // ideal func
   return w;
 }
 
-MatrixXf predict(MatrixXf X, MatrixXf Y, MatrixXf w)
-{ MatrixXf pred = X * w;
-  MatrixXf diff = pred - Y;
-  MatrixXf loss = diff.transpose() * diff;
+MatrixXd predict(MatrixXd X, MatrixXd Y, MatrixXd w)
+{ MatrixXd pred = X * w;
+  MatrixXd diff = pred - Y;
+  MatrixXd loss = diff.transpose() * diff;
   cout<< "Test Loss: "<< loss(0,0)/X.rows() << endl;
   return pred;
 }
 
-MatrixXf predict(MatrixXf X, MatrixXf w)
+MatrixXd predict(MatrixXd X, MatrixXd w)
 { return X * w;}
 
 int main(){
@@ -389,33 +389,33 @@ int main(){
   //==========================================
   cout<<"Reading Data:"<<endl;
   // loading mnist dataset: training and testing portion separately
-  vector<vector<float> > X_train;   // dim: 60000 x 784, 60000 training samples with 784 features
-  vector<float> Y_train;            // dim: 60000 x 1  , the true label of each training sample
+  vector<vector<double> > X_train;   // dim: 60000 x 784, 60000 training samples with 784 features
+  vector<double> Y_train;            // dim: 60000 x 1  , the true label of each training sample
   read_data("datasets/mnist/mnist_train.csv", X_train, Y_train);
   
-  MatrixXf X1(N, d); // 60000, 784
-  MatrixXf Y1(N, 1); // 60000, 1
+  MatrixXd X1(N, d); // 60000, 784
+  MatrixXd Y1(N, 1); // 60000, 1
 
   for (int i = 0; i < N; i++)
   {
-    X1.row(i) = VectorXf::Map(&X_train[i][0], d)/255.0; // VectorXf::Map(&X_train[i][0],X_train[i].size());
-    Y1.row(i) = VectorXf::Map(&Y_train[i],1)/10.0;
+    X1.row(i) = VectorXd::Map(&X_train[i][0], d)/255.0; // VectorXf::Map(&X_train[i][0],X_train[i].size());
+    Y1.row(i) = VectorXd::Map(&Y_train[i],1)/10.0;
   }
 
-  vector<vector<float> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
-  vector<float> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
+  vector<vector<double> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
+  vector<double> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
   read_data("datasets/mnist/mnist_test.csv", X_test, Y_test);
 
-  MatrixXf X1_test(N_test, d); // 1000, 784
-  MatrixXf Y1_test(N_test, 1); // 1000, 1
+  MatrixXd X1_test(N_test, d); // 1000, 784
+  MatrixXd Y1_test(N_test, 1); // 1000, 1
 
   for (int i = 0; i < N_test; i++)
   {
-    X1_test.row(i) = VectorXf::Map(&X_test[i][0], d)/255.0;
-    Y1_test.row(i) = VectorXf::Map(&Y_test[i],1)/10.0;
+    X1_test.row(i) = VectorXd::Map(&X_test[i][0], d)/255.0;
+    Y1_test.row(i) = VectorXd::Map(&Y_test[i],1)/10.0;
   }
 
-  MatrixXf w1 = MatrixXf::Random(d,1);
+  MatrixXd w1 = MatrixXd::Random(d,1);
   //cout << "Here is Matrix w1:\n" << w1 <<endl;
   //==========================================
 
@@ -437,11 +437,11 @@ int main(){
   //==========================================
   // Sanity Check data:
   //==========================================
-  MatrixXf X2(6,2);
+  MatrixXd X2(6,2);
   X2 << 4,1,2,8,1,0,3,2,1,4,6,7;
-  MatrixXf Y2(6,1);
+  MatrixXd Y2(6,1);
   Y2 << 2,-14,1,-1,-7,-8;
-  MatrixXf w2(2,1);
+  MatrixXd w2(2,1);
   w2 << 1.65921924,1.62628418;
   //cout << "Here is the matrix X2:\n" << X2 <<endl;
   //cout << "Here is the matrix Y2:\n" << Y2 <<endl;
@@ -455,12 +455,12 @@ int main(){
   cout << "=============================="<<endl;
   cout << "IDEAL LINEAR REGRESSION (SGD):"<<endl;
   cout << "=============================="<<endl<<endl;
-  MatrixXf ideal_w = idealLinearRegression(X1,Y1,w1);
+  MatrixXd ideal_w = idealLinearRegression(X1,Y1,w1);
   //cout << "Final weights (under Ideal Functionality) are:\n" << ideal_w <<endl;
   cout << endl << "==========================================="<<endl;
   cout << "PRIVACY-PRESERVING LINEAR REGRESSION (SGD):"<<endl;
   cout << "==========================================="<<endl<<endl;
-  MatrixXf new_w = linearRegression(X1,Y1,w1);
+  MatrixXd new_w = linearRegression(X1,Y1,w1);
   //cout << "Final weights (under Privacy Preserving) are:\n" << new_w <<endl;
 
 
@@ -472,16 +472,16 @@ int main(){
   cout << endl << "==================================="<<endl;
   cout << "PREDICTION (using trained weights):"<<endl;
   cout << "==================================="<<endl<<endl;
-  MatrixXf pred = predict(X1_test, Y1_test, new_w);
+  MatrixXd pred = predict(X1_test, Y1_test, new_w);
   //cout << pred <<endl;
 
   cout << endl << "Single example predictions: " << endl;
 
   for (int k = 123; k < 600; k += 100){
     cout << "True Label: " << Y1_test.row(k) << endl;
-    MatrixXf pred_i = predict(X1_test.row(k), ideal_w);
+    MatrixXd pred_i = predict(X1_test.row(k), ideal_w);
     cout << "Ideal Prediction: " << pred_i <<endl;
-    MatrixXf pred_p = predict(X1_test.row(k), new_w);
+    MatrixXd pred_p = predict(X1_test.row(k), new_w);
     cout << "PP Prediction: " << pred_p <<endl;
   }
 

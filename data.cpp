@@ -13,8 +13,8 @@ using namespace std;
 */
 int main() {
 
-  vector<vector<float> > X;
-  vector<float > Y;
+  vector<vector<double> > X;
+  vector<double > Y;
   // read_data("datasets/medical_cost/insurance.csv", X, Y);
   read_data("datasets/mnist/mnist_test.csv", X, Y);
 
