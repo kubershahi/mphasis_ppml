@@ -4,6 +4,7 @@
 #include <string>
 #include <list>
 #include <Eigen/Dense>
+#include <math.h>
 
 using namespace std;
 using namespace Eigen;
@@ -17,13 +18,62 @@ typedef Eigen::Matrix<uint64_t, 1, Eigen::Dynamic, Eigen::RowMajor> RowVectorXi6
 //   l.push_back(item);
 // }
 
+
+MatrixXd uint64tofloat(MatrixXi64 A)
+{
+  MatrixXd res(A.rows(),A.cols());
+  for (int i = 0; i < A.rows(); i++)
+  {
+    for (int j = 0; j < A.cols(); j++)
+    {
+      uint64_t a = A(i,j);
+      if (a & (1UL << 63))
+      {
+        res(i,j) = -((double) pow(2,64) - a)/SCALING_FACTOR;
+        //cout<< res(i,j) << " is negative"<<endl;
+      }
+      else
+      {
+        res(i,j) = ((double) a)/SCALING_FACTOR;
+        //cout<< res(i,j) << " is positive"<<endl;
+      }
+        
+    }
+  } 
+  return res;
+}
+
+MatrixXi64 truncate(MatrixXi64 A, int factor)
+{
+  MatrixXi64 res(A.rows(),A.cols());
+  for (int i = 0; i < A.rows(); i++)
+  {
+    for (int j = 0; j < A.cols(); j++)
+    {
+      uint64_t a = A(i,j);
+      if (a & (1UL << 63))
+      {
+        res(i,j) = pow(2,64) - (pow(2,64) - a)/factor;
+        //cout<< res(i,j) << " is negative"<<endl;
+      }
+      else
+      {
+        res(i,j) = a/factor;
+        //cout<< res(i,j) << " is positive"<<endl;
+      }
+        
+    }
+  } 
+  return res;
+}
+
 // ==================================
 
 int N = 6; //6
 int N_test = 6;
 int d = 2; //5
-int B = 6; //3
-int NUM_EPOCHS = 2; // change; shuffle order
+int B = 3; //3
+int NUM_EPOCHS = 3; // change; shuffle order
 
 MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w) // ideal functionality
 {
@@ -36,25 +86,42 @@ MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w) // id
     float epoch_loss = 0.0;
 
     for(int i = 0; i < int(N/B); i ++)
-    { cout<<"=";
+    { 
+      cout<<"===";
       MatrixXi64 YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
 
       //truncation:
-      YY /= SCALING_FACTOR;
+      //YY /= SCALING_FACTOR;
+      YY = truncate(YY, SCALING_FACTOR);
+
+      //test
+      //MatrixXd YYtest = uint64tofloat(YY); // descaling
+      //cout<< "yhat: "<< endl << YYtest << endl;
 
       MatrixXi64 D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
+
+      //test
+      //MatrixXd Dtest = uint64tofloat(D);// descaling
+      //cout<< "diff: "<< endl << Dtest << endl;
       
       // Loss Computation
-      MatrixXi64 temp_loss = (D / SCALING_FACTOR).transpose() * (D / SCALING_FACTOR);
-      MatrixXd loss = temp_loss.cast<double>();
+      MatrixXd loss = uint64tofloat(D).transpose() * uint64tofloat(D);
+      //MatrixXd loss = temp_loss.cast<double>();
 
       MatrixXi64 delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
-      
-      //truncation:
-      delta /= SCALING_FACTOR;
+      //cout<< "grad_raw: " << endl << delta << endl;
 
-      w = w - (delta / (B * 100)); // w -= a/B * delta
-      //cout<<w<<endl;
+      //truncation:
+      //delta /= SCALING_FACTOR;
+      delta = truncate(delta, SCALING_FACTOR);
+      //test
+      //MatrixXd gradtest = uint64tofloat(delta);// descaling
+      //cout<< "grad: " << endl << gradtest << endl;
+
+
+      delta = truncate(delta, 128); // eta/B * delta, eta/B = 128 = 2^7 
+      w = w - delta; // w -= a/B * delta
+      //cout<<"weights: "<< endl << uint64tofloat(w) <<endl;
       epoch_loss += loss(0,0);
     }
     cout<<endl;
@@ -87,6 +154,7 @@ void bin(long n)
     }
   }
 
+
 int main(){
 
   // MatrixXf X = MatrixXf::Random(1);
@@ -100,9 +168,9 @@ int main(){
   //w << 1.65921924,1.62628418;
 
   MatrixXf X(6,2);
-  X << 4,1,2,8,1,0,3,2,1,4,6,7;
+  X << 4.243,1.244,-2.983,8.382,-1.534,0.913,3.142,2.434,-1.039,4.012,6.144,7.782;
   MatrixXf Y(6,1);
-  Y << 2,14,1,1,7,8;
+  Y << 2,14,-1,1,7,8;
   MatrixXf w(2,1);
   w << 1.65921924,1.62628418;
 
@@ -124,21 +192,29 @@ int main(){
   cout << "Here is the SCALED and MAPPED matrix X:\n" << X_ <<endl;
   cout << "Here is the SCALED and MAPPED matrix w:\n" << w_ <<endl;
 
-  MatrixXi64 U = X_ * w_;
-  U /= SCALING_FACTOR; // truncation
+  //MatrixXi64 U = X_ * w_;
+  //U /= SCALING_FACTOR; // truncation
 
-  MatrixXd U_ = U.cast<double>();
-  U_ /= SCALING_FACTOR; // descaling
+  //MatrixXd U_ = U.cast<double>();
+  //U_ /= SCALING_FACTOR; // descaling
 
   //cout << "Here is the calculated X.w:\n" << U_ <<endl;
 
+  // Figure NEGATIVE NUMBERS OUT
+
+  //MatrixXd test1(3,1);
+  //test1 << 1,2,-3;
+  //test1 = test1 * SCALING_FACTOR;
+  //MatrixXi64 T1 = test1.cast<uint64_t>();
+  //cout << "Here is the SCALED and MAPPED matrix T1:\n" << T1 <<endl;
+
+  //MatrixXd T1_ = uint64tofloat(T1);
+  //cout << "Here is the DESCALED matrix T1_:\n" << T1_ <<endl;
+
   MatrixXi64 new_w = idealLinearRegression(X_,Y_,w_);
-  MatrixXd new_w_ = new_w.cast<double>();
-  new_w_ /= SCALING_FACTOR; // descaling
+  MatrixXd new_w_f = uint64tofloat(new_w); // descaling
 
-  cout<<"Final weights are: "<<new_w_<<endl;
-
-
+  cout<<"Final weights are: "<< new_w_f <<endl;
 
 
   // =================================
