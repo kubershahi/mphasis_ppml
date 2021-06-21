@@ -73,7 +73,7 @@ void read_insurance_data(string inputfile, vector<vector<double> > &X, vector<do
 }
 
 
-//function to read a dataset with all numerical values line MNIST dataset
+//function to read any dataset with all numerical values like MNIST dataset.
 void read_data(string inputfile, vector< vector<double> > &X, vector<double> &Y) {
 
   ifstream fin;                     // declaring the input file stream
