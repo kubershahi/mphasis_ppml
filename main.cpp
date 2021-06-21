@@ -36,14 +36,25 @@ Dimensions:
 ====================================
 */
 
+
 // ====================================
 // Global Declarations: 
 // ==================================== 
-int N = 10000; //6
-int N_test = 1000;
-int d = 784; //5
-int B = 128; //3
-int NUM_EPOCHS = 5; // change; shuffle order
+
+// // for medical dataset
+// int N = 1078;
+// int N_test = 268;
+// int d = 5;
+// int B = 2;
+// int NUM_EPOCHS = 100;
+
+// for MNIST dataset
+int N = 60000;        
+int N_test = 1000;        
+int d = 784;          
+int B = 128; 
+int NUM_EPOCHS = 5;
+
 // ====================================
 
 
@@ -385,14 +396,20 @@ MatrixXd predict(MatrixXd X, MatrixXd w)
 int main(){
 
   //==========================================
-  // MNIST data:
+  // Loadin and Pre processing data:
   //==========================================
   cout<<"Reading Data:"<<endl;
   // loading mnist dataset: training and testing portion separately
   vector<vector<double> > X_train;   // dim: 60000 x 784, 60000 training samples with 784 features
   vector<double> Y_train;            // dim: 60000 x 1  , the true label of each training sample
-  read_data("datasets/mnist/mnist_train.csv", X_train, Y_train);
   
+  // read_insurance_data("datasets/medical/insurance_train.csv", X_train, Y_train); // for medical dataset
+  read_data("datasets/mnist/mnist_train.csv", X_train, Y_train);             // for MNIST dataset
+  
+  // for (int i =0; i <10; i++){
+  //   cout << X_train[i][0] << " "  << X_train[i][1] << " " << X_train[i][2] << " " << X_train[i][3] << " " << X_train[i][4] << " " << Y_train[i] << endl;
+  // }
+
   MatrixXd X1(N, d); // 60000, 784
   MatrixXd Y1(N, 1); // 60000, 1
 
@@ -402,9 +419,14 @@ int main(){
     Y1.row(i) = VectorXd::Map(&Y_train[i],1)/10.0;
   }
 
+  cout << "Working: " << endl;
+
   vector<vector<double> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
   vector<double> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
-  read_data("datasets/mnist/mnist_test.csv", X_test, Y_test);
+
+
+  // read_insurance_data("datasets/medical/insurance_test.csv", X_test, Y_test); // for medical dataset
+  read_data("datasets/mnist/mnist_test.csv", X_test, Y_test);                  // for MNIST dataset
 
   MatrixXd X1_test(N_test, d); // 1000, 784
   MatrixXd Y1_test(N_test, 1); // 1000, 1
@@ -477,7 +499,7 @@ int main(){
 
   cout << endl << "Single example predictions: " << endl;
 
-  for (int k = 123; k < 600; k += 100){
+  for (int k = 100; k < 200; k += 15){
     cout << "True Label: " << Y1_test.row(k) << endl;
     MatrixXd pred_i = predict(X1_test.row(k), ideal_w);
     cout << "Ideal Prediction: " << pred_i <<endl;
@@ -548,5 +570,3 @@ void verify()
 
   */
 }
-
-
