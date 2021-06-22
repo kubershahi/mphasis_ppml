@@ -405,19 +405,30 @@ MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w) // ideal func
   // w -= a/|B| X^T .(X.w - Y)
   //int t = (N * NUM_EPOCHS)/B; // E = 1
   //float eta = 0.01;
+
+  //int N = 6; //6
+  //int d = 2; //5
+  //int B = 1; //3
+  //int NUM_EPOCHS = 2; 
+
+
   for(int e = 0; e < NUM_EPOCHS; e ++)
   { cout<< "Epoch Number: "<< e+1;
-    cout<<" Progress: ";
+    //cout<<" Progress: ";
     float epoch_loss = 0.0;
 
     for(int i = 0; i < int(N/B); i ++)
-    { cout<<"=";
+    { //cout<<"=";
       MatrixXd YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
+      //cout<< "yhat: "<< endl << YY << endl;
       MatrixXd D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
+      //cout<< "diff: "<< endl << D << endl;
       // Loss Computation
       MatrixXd loss = D.transpose() * D;
       MatrixXd delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
+      //cout<< "grad: " << endl << delta << endl;
       w = w - (delta / (B * 100)); // w -= a/B * delta
+      //cout<<"weights: "<< endl << w <<endl;
       //cout<<w<<endl;
       epoch_loss += loss(0,0);
     }
@@ -451,17 +462,17 @@ MatrixXi64 idealFloatingLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 
 
   int N = 6; //6
   int d = 2; //5
-  int B = 3; //3
-  int NUM_EPOCHS = 5; 
+  int B = 1; //3
+  int NUM_EPOCHS = 3; 
 
   for(int e = 0; e < NUM_EPOCHS; e ++)
   { cout<< "Epoch Number: "<< e+1;
-    cout<<" Progress: ";
+    //cout<<" Progress: ";
     float epoch_loss = 0.0;
 
     for(int i = 0; i < int(N/B); i ++)
     { 
-      cout<<"=";
+      //cout<<"=";
       MatrixXi64 YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
 
       //truncation:
@@ -469,13 +480,13 @@ MatrixXi64 idealFloatingLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 
       YY = truncate(YY, SCALING_FACTOR);
 
       //test
-      MatrixXd YYtest = uint64tofloat(YY); // descaling
+      //MatrixXd YYtest = uint64tofloat(YY); // descaling
       //cout<< "yhat: "<< endl << YYtest << endl;
 
       MatrixXi64 D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
 
       //test
-      MatrixXd Dtest = uint64tofloat(D);// descaling
+      //MatrixXd Dtest = uint64tofloat(D);// descaling
       //cout<< "diff: "<< endl << Dtest << endl;
       
       // Loss Computation
@@ -488,10 +499,8 @@ MatrixXi64 idealFloatingLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 
       //delta /= SCALING_FACTOR;
       delta = truncate(delta, SCALING_FACTOR);
       //test
-      MatrixXd gradtest = uint64tofloat(delta);// descaling
+      //MatrixXd gradtest = uint64tofloat(delta);// descaling
       //cout<< "grad: " << endl << gradtest << endl;
-
-
       delta = truncate(delta, 128); // eta/B * delta, eta/B = 128 = 2^7 
       w = w - delta; // w -= a/B * delta
       //cout<<"weights: "<< endl << uint64tofloat(w) <<endl;
@@ -578,7 +587,6 @@ int main(){
   //cout << "Final weights (under Privacy Preserving) are:\n" << new_w <<endl;
   //==========================================
 
-
   //==========================================
   // Sanity Check data:
   //==========================================
@@ -608,26 +616,19 @@ int main(){
   MatrixXd new_w = linearRegression(X1,Y1,w1);
   //cout << "Final weights (under Privacy Preserving) are:\n" << new_w <<endl;
 
-
-
   //==========================================
   // MODEL PREDICTION:
   //==========================================
-  /*
+
   cout << endl << "==================================="<<endl;
   cout << "PREDICTION (using trained weights):"<<endl;
   cout << "==================================="<<endl<<endl;
   MatrixXd pred = predict(X1_test, Y1_test, new_w);
   //cout << pred <<endl;
-*/
+
   /*
   cout << endl << "Single example predictions: " << endl;
-<<<<<<< HEAD
   for (int k = 500; k < 701; k += 100){
-=======
-
-  for (int k = 100; k < 200; k += 15){
->>>>>>> ad67b80fbdcd230b649535f71b8da79e42e8a2d7
     cout << "True Label: " << Y1_test.row(k) << endl;
     MatrixXd pred_i = predict(X1_test.row(k), ideal_w);
     cout << "Ideal Prediction: " << pred_i <<endl;
@@ -636,7 +637,9 @@ int main(){
   }
   */
 
-  cout<<"============================"<<endl<<"============================"<<endl;
+  cout << "=============================="<<endl;
+  cout << "FLOATING LINEAR REGRESSION (SGD):"<<endl;
+  cout << "=============================="<<endl<<endl;
 
   X2 = X2 * SCALING_FACTOR; // double to uint_64
   Y2 = Y2 * SCALING_FACTOR; // double to uint_64
