@@ -17,7 +17,7 @@ Output: returns dataset, data in two-dimensional vector.
 using namespace std;
 
 // function to read the medical insurance dataset
-void read_insurance_data(string inputfile, vector<vector<double> > &X, vector<double> &Y){
+void read_insurance_data(string inputfile, vector< vector<double> > &X, vector<double> &Y){
   
   ifstream fin;                    // declaring the input filestream
   fin.open(inputfile);             // opening the file

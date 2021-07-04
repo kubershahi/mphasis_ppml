@@ -59,7 +59,7 @@ int NUM_EPOCHS = 5; // change; shuffle order
 //int NUM_EPOCHS = 5; // change; shuffle order
 
 // for medical dataset
-// int N = 1078;
+// int N = 1070;
 // int N_test = 268;
 // int d = 5;
 // int B = 2;
@@ -463,7 +463,7 @@ MatrixXi64 idealFloatingLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 
   int N = 6; //6
   int d = 2; //5
   int B = 1; //3
-  int NUM_EPOCHS = 3; 
+  int NUM_EPOCHS = 5; 
 
   for(int e = 0; e < NUM_EPOCHS; e ++)
   { cout<< "Epoch Number: "<< e+1;
@@ -636,7 +636,7 @@ int main(){
     cout << "PP Prediction: " << pred_p <<endl;
   }
   */
-
+ 
   cout << "=============================="<<endl;
   cout << "FLOATING LINEAR REGRESSION (SGD):"<<endl;
   cout << "=============================="<<endl<<endl;
@@ -653,7 +653,7 @@ int main(){
   MatrixXi64 new_w_ = idealFloatingLinearRegression(X_,Y_,w_);
   MatrixXd new_w_f = uint64tofloat(new_w_); // descaling
 
-  //cout<<"Final weights are: "<< new_w_f <<endl;
+  cout<<"Final weights are: "<< new_w_f <<endl;
 
 }
 
