@@ -24,7 +24,7 @@ int N = 1;
 int N_test = 268;
 int d = 5;
 int B = 1;
-int NUM_EPOCHS = 3;
+int NUM_EPOCHS = 1;
 
 
 // function that takes float to unit64
@@ -116,10 +116,10 @@ MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w) // ideal func
     for(int i = 0; i < int(N/B); i ++) // for each nuber of iteration in an epoch
     { 
       MatrixXd YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
-      cout<< "y_hat: "<< YY << endl;
+      // cout<< "y_hat: "<< YY << endl;
 
       MatrixXd D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
-      cout<< "diff: "<< D << endl;
+      // cout<< "diff: "<< D << endl;
 
       MatrixXd loss = D.transpose() * D;
 
@@ -131,7 +131,7 @@ MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w) // ideal func
       //cout<<w<<endl;
       epoch_loss += loss(0,0);
     }
-    cout<< endl <<  "Loss: "<< epoch_loss/N << endl<< endl;
+    cout<<  "Loss: "<< epoch_loss/N << endl;
   }
   
   return w;
@@ -192,7 +192,12 @@ int main(){
   MatrixXd w_val = MatrixXd::Random(5,1);
   //cout << "Here is the matrix X_val:\n" << X_val <<endl;
   //cout << "Here is the matrix Y_val:\n" << Y_val <<endl;
-  cout << "Here is the matrix w_val:\n" << w_val <<endl;
+  cout <<endl << "Here is the matrix w_val:\n" << w_val <<endl;
+
+  MatrixXi64 w_i = floattouint64(w_val);
+  MatrixXd w_f = uint64tofloat(w_i);
+
+  cout <<endl << "Here is the matrix w_f:\n" << w_f <<endl;
   //==========================================
 
   //==========================================
@@ -203,7 +208,7 @@ int main(){
   cout << "IDEAL LINEAR REGRESSION (SGD):"<<endl;
   cout << "=============================="<<endl<<endl;
   MatrixXd ideal_w = idealLinearRegression(X_val,Y_val,w_val);
-  cout << "Final weights (under Ideal Functionality) are:\n" << ideal_w <<endl<<endl;
+  cout << endl << "Final weights (under Ideal Functionality) are:\n" << ideal_w <<endl<<endl;
 
   cout << "=============================="<<endl;
   cout << "Truncated LINEAR REGRESSION (SGD):"<<endl;
@@ -228,5 +233,5 @@ int main(){
   // cout << "Final weights before descaling are:\n" << new_w_ <<endl<<endl;
   
   MatrixXd trun_w_f = uint64tofloat(trun_w); // descaling
-  cout << "Final weights (under truncated Functionality) are:\n" << trun_w_f <<endl<<endl;
+  cout << endl << "Final weights (under truncated Functionality) are:\n" << trun_w_f <<endl<<endl;
 }

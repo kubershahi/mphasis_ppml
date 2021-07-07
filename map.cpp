@@ -19,6 +19,33 @@ typedef Eigen::Matrix<uint64_t, 1, Eigen::Dynamic, Eigen::RowMajor> RowVectorXi6
 // }
 
 
+// function that takes float to unit64
+MatrixXi64 floattouint64(MatrixXd A)
+{
+  MatrixXi64 res(A.rows(),A.cols());
+
+  for (int i = 0; i < A.rows(); i++)
+  {
+    for (int j = 0; j < A.cols(); j++)
+    {
+      double a = A(i,j);
+      if ( a >= 0)
+      {
+        res(i,j) = (uint64_t) (a * SCALING_FACTOR);
+        //cout<< res(i,j) << " is positive"<<endl;
+      }
+      else
+      {
+        a = abs(a * SCALING_FACTOR);
+        res(i,j) = (uint64_t) pow(2,64) - a;
+        //cout<< res(i,j) << " is negative"<<endl;
+      }
+    }
+  } 
+  return res;
+}
+
+//function that takes unit64 to float
 MatrixXd uint64tofloat(MatrixXi64 A)
 {
   MatrixXd res(A.rows(),A.cols());
@@ -144,15 +171,15 @@ MatrixXf predict(MatrixXf X, MatrixXf Y, MatrixXf w)
 // ==================================
 
 void bin(long n)
+{
+  long i;
+  cout << "0";
+  for (i = 1 << 30; i > 0; i = i / 2)
   {
-    long i;
-    cout << "0";
-    for (i = 1 << 30; i > 0; i = i / 2)
-    {
-      if((n & i) != 0) cout << "1";
-      else cout << "0";
-    }
+    if((n & i) != 0) cout << "1";
+    else cout << "0";
   }
+}
 
 
 int main(){
@@ -167,58 +194,59 @@ int main(){
   //MatrixXd w(2,1);
   //w << 1.65921924,1.62628418;
 
-  MatrixXf X(6,2);
-  X << 4.243,1.244,-2.983,8.382,-1.534,0.913,3.142,2.434,-1.039,4.012,6.144,7.782;
-  MatrixXf Y(6,1);
-  Y << 2,14,-1,1,7,8;
-  MatrixXf w(2,1);
-  w << 1.65921924,1.62628418;
+  // MatrixXf X(6,2);
+  // X << 4.243,1.244,-2.983,8.382,-1.534,0.913,3.142,2.434,-1.039,4.012,6.144,7.782;
+  // MatrixXf Y(6,1);
+  // Y << 2,14,-1,1,7,8;
+  // MatrixXf w(2,1);
+  // w << 1.65921924,1.62628418;
 
-  cout << "Here is the matrix X:\n" << X <<endl;
-  cout << "Here is the matrix w:\n" << w <<endl;
-  //cout << "Here is the expected X.w:\n" << X * w <<endl;
+  // cout << "Here is the matrix X:\n" << X <<endl;
+  // cout << "Here is the matrix w:\n" << w <<endl;
+  // //cout << "Here is the expected X.w:\n" << X * w <<endl;
 
-  X = X * SCALING_FACTOR; // double to uint_64
-  Y = Y * SCALING_FACTOR; // double to uint_64
-  w = w * SCALING_FACTOR; // double to uint_64
+  // X = X * SCALING_FACTOR; // double to uint_64
+  // Y = Y * SCALING_FACTOR; // double to uint_64
+  // w = w * SCALING_FACTOR; // double to uint_64
 
-  //cout << "Here is the SCALED matrix X:\n" << X <<endl;
-  //cout << "Here is the SCALED matrix w:\n" << w <<endl;
+  // //cout << "Here is the SCALED matrix X:\n" << X <<endl;
+  // //cout << "Here is the SCALED matrix w:\n" << w <<endl;
 
-  MatrixXi64 X_ = X.cast<uint64_t>();
-  MatrixXi64 Y_ = Y.cast<uint64_t>();
-  MatrixXi64 w_ = w.cast<uint64_t>();
+  // MatrixXi64 X_ = X.cast<uint64_t>();
+  // MatrixXi64 Y_ = Y.cast<uint64_t>();
+  // MatrixXi64 w_ = w.cast<uint64_t>();
 
-  cout << "Here is the SCALED and MAPPED matrix X:\n" << X_ <<endl;
-  cout << "Here is the SCALED and MAPPED matrix w:\n" << w_ <<endl;
+  // cout << "Here is the SCALED and MAPPED matrix X:\n" << X_ <<endl;
+  // cout << "Here is the SCALED and MAPPED matrix w:\n" << w_ <<endl;
 
-  //MatrixXi64 U = X_ * w_;
-  //U /= SCALING_FACTOR; // truncation
+  // //MatrixXi64 U = X_ * w_;
+  // //U /= SCALING_FACTOR; // truncation
 
-  //MatrixXd U_ = U.cast<double>();
-  //U_ /= SCALING_FACTOR; // descaling
+  // //MatrixXd U_ = U.cast<double>();
+  // //U_ /= SCALING_FACTOR; // descaling
 
-  //cout << "Here is the calculated X.w:\n" << U_ <<endl;
+  // //cout << "Here is the calculated X.w:\n" << U_ <<endl;
 
-  // Figure NEGATIVE NUMBERS OUT
+  // // Figure NEGATIVE NUMBERS OUT
 
-  //MatrixXd test1(3,1);
-  //test1 << 1,2,-3;
-  //test1 = test1 * SCALING_FACTOR;
-  //MatrixXi64 T1 = test1.cast<uint64_t>();
-  //cout << "Here is the SCALED and MAPPED matrix T1:\n" << T1 <<endl;
+  // //MatrixXd test1(3,1);
+  // //test1 << 1,2,-3;
+  // //test1 = test1 * SCALING_FACTOR;
+  // //MatrixXi64 T1 = test1.cast<uint64_t>();
+  // //cout << "Here is the SCALED and MAPPED matrix T1:\n" << T1 <<endl;
 
-  //MatrixXd T1_ = uint64tofloat(T1);
-  //cout << "Here is the DESCALED matrix T1_:\n" << T1_ <<endl;
+  // //MatrixXd T1_ = uint64tofloat(T1);
+  // //cout << "Here is the DESCALED matrix T1_:\n" << T1_ <<endl;
 
-  MatrixXi64 new_w = idealLinearRegression(X_,Y_,w_);
-  MatrixXd new_w_f = uint64tofloat(new_w); // descaling
+  // MatrixXi64 new_w = idealLinearRegression(X_,Y_,w_);
+  // MatrixXd new_w_f = uint64tofloat(new_w); // descaling
 
-  cout<<"Final weights are: "<< new_w_f <<endl;
+  // cout<<"Final weights are: "<< new_w_f <<endl;
 
 
   // =================================
-  /*
+  // mapping example
+  
   double X = 10.15723545348;
   double Y = 5.23423452345;
   double Z = X * Y; // the value we want to approximate
@@ -252,11 +280,9 @@ int main(){
   zz /= SCALING_FACTOR;
   cout << "z after cast,        110101.001010     : "<< zz << endl << endl;
 
-
   // // selecting certain columns of a Matrix
   // Map<MatrixXf> X1(X.data()+5,5,X.cols());
 
   // casting a matrix;
   // MatrixXi x = X.cast<int>();
-  */
 }
