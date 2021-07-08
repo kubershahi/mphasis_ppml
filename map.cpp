@@ -4,22 +4,48 @@
 #include <string>
 #include <list>
 #include <Eigen/Dense>
-#include <math.h>
+#include <cmath>
+#include <stdlib.h>
 
 using namespace std;
 using namespace Eigen;
 
-#define SCALING_FACTOR 8192 // Precision of 13 bits
+#define SCALING_FACTOR 16777216// Precision of 24 bits
+
+/*
+
+2^16 = 65536
+2^20 = 1048576 
+2^24 = 16777216
+
+*/
+
 
 typedef Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> MatrixXi64;
 typedef Eigen::Matrix<uint64_t, 1, Eigen::Dynamic, Eigen::RowMajor> RowVectorXi64;
 
-// void insert(vector<int>  &l, int item){
-//   l.push_back(item);
-// }
+uint64_t G = pow(2,64);
+
+// function that converts a single number from double to unit64
+uint64_t floattouint64(double a)
+{
+  uint64_t res;
+  if ( a >= 0)
+  {
+    res = (a * SCALING_FACTOR);
+    // cout<< res << " is positive"<<endl;
+  }
+  else
+  {
+    a = abs(a * SCALING_FACTOR);
+    res = (uint64_t) pow(2,64) - a;
+    // cout<< res << " is negative"<<endl;
+  }
+  return res;
+}
 
 
-// function that takes float to unit64
+// function that converts double Matrix to unit64 Matrix
 MatrixXi64 floattouint64(MatrixXd A)
 {
   MatrixXi64 res(A.rows(),A.cols());
@@ -45,7 +71,26 @@ MatrixXi64 floattouint64(MatrixXd A)
   return res;
 }
 
-//function that takes unit64 to float
+
+//function that converts a single unit64 number to double
+double uint64tofloat(uint64_t a)
+{
+  double res;
+  if (a & (1UL << 63))
+  {
+    res = -((double) G - a)/SCALING_FACTOR;
+    //cout<< res(i,j) << " is negative"<<endl;
+  }
+  else
+  {
+    res = ((double) a)/SCALING_FACTOR;
+    //cout<< res(i,j) << " is positive"<<endl;
+  }
+  return res;
+}
+
+
+//function that coverts unit64 matrix to double matrix
 MatrixXd uint64tofloat(MatrixXi64 A)
 {
   MatrixXd res(A.rows(),A.cols());
@@ -56,7 +101,7 @@ MatrixXd uint64tofloat(MatrixXi64 A)
       uint64_t a = A(i,j);
       if (a & (1UL << 63))
       {
-        res(i,j) = -((double) pow(2,64) - a)/SCALING_FACTOR;
+        res(i,j) = -((double) G - a)/SCALING_FACTOR;
         //cout<< res(i,j) << " is negative"<<endl;
       }
       else
@@ -70,6 +115,56 @@ MatrixXd uint64tofloat(MatrixXi64 A)
   return res;
 }
 
+
+//function that creates shares of an integer
+void share(uint64_t A, uint64_t shares[])
+{
+	uint64_t A_0 = rand();
+	shares[0] = A_0;
+	shares[1] = A - A_0;
+}
+
+//function that creates shares of integers in a matrix
+void share(MatrixXi64 A, MatrixXi64 shares[])
+{
+	MatrixXi64 A_0 = MatrixXi64::Random(A.rows(),A.cols()) / 10000;
+	shares[0] = A_0;
+	shares[1] = A - A_0;
+}
+
+
+// For integer numbers
+uint64_t rec(uint64_t A, uint64_t B)
+{
+	return A + B;
+}
+
+
+// For integer matrices
+MatrixXi64 rec(MatrixXi64 A, MatrixXi64 B)
+{
+	return A + B;
+}
+
+
+// function that truncates integer values
+uint64_t truncate(uint64_t a, int factor)
+{
+  uint64_t res;
+  if (a & (1UL << 63))
+  {
+    res = G - (G - a)/factor;
+    //cout << res << " is negative"<<endl;
+  }
+  else
+  {
+    res = a/factor;
+    //cout<< res << " is positive"<<endl;
+  }
+  return res;
+}
+
+// function that truncates integer values in a given matrix
 MatrixXi64 truncate(MatrixXi64 A, int factor)
 {
   MatrixXi64 res(A.rows(),A.cols());
@@ -80,7 +175,7 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
       uint64_t a = A(i,j);
       if (a & (1UL << 63))
       {
-        res(i,j) = pow(2,64) - (pow(2,64) - a)/factor;
+        res(i,j) = G - (G - a)/factor;
         //cout<< res(i,j) << " is negative"<<endl;
       }
       else
@@ -94,195 +189,72 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
   return res;
 }
 
-// ==================================
 
-int N = 6; //6
-int N_test = 6;
-int d = 2; //5
-int B = 3; //3
-int NUM_EPOCHS = 3; // change; shuffle order
-
-MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w) // ideal functionality
+// function that truncates the shares
+uint64_t truncate_share(uint64_t a, int factor, int i)
 {
-  // w -= a/|B| X^T .(X.w - Y)
-  //int t = (N * NUM_EPOCHS)/B; // E = 1
-  //float eta = 0.01;
-  for(int e = 0; e < NUM_EPOCHS; e ++)
-  { cout<< "Epoch Number: "<< e+1;
-    cout<<" Progress: ";
-    float epoch_loss = 0.0;
-
-    for(int i = 0; i < int(N/B); i ++)
-    { 
-      cout<<"===";
-      MatrixXi64 YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
-
-      //truncation:
-      //YY /= SCALING_FACTOR;
-      YY = truncate(YY, SCALING_FACTOR);
-
-      //test
-      //MatrixXd YYtest = uint64tofloat(YY); // descaling
-      //cout<< "yhat: "<< endl << YYtest << endl;
-
-      MatrixXi64 D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
-
-      //test
-      //MatrixXd Dtest = uint64tofloat(D);// descaling
-      //cout<< "diff: "<< endl << Dtest << endl;
-      
-      // Loss Computation
-      MatrixXd loss = uint64tofloat(D).transpose() * uint64tofloat(D);
-      //MatrixXd loss = temp_loss.cast<double>();
-
-      MatrixXi64 delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
-      //cout<< "grad_raw: " << endl << delta << endl;
-
-      //truncation:
-      //delta /= SCALING_FACTOR;
-      delta = truncate(delta, SCALING_FACTOR);
-      //test
-      //MatrixXd gradtest = uint64tofloat(delta);// descaling
-      //cout<< "grad: " << endl << gradtest << endl;
-
-
-      delta = truncate(delta, 128); // eta/B * delta, eta/B = 128 = 2^7 
-      w = w - delta; // w -= a/B * delta
-      //cout<<"weights: "<< endl << uint64tofloat(w) <<endl;
-      epoch_loss += loss(0,0);
-    }
-    cout<<endl;
-    cout<< "Loss: "<< epoch_loss/N << endl;
+  uint64_t res;
+  if (i == 0){
+    res = truncate(a, SCALING_FACTOR); // truncation for 0th share
   }
-  
-  return w;
-}
+  else{ 
+    res = G - truncate(G - a, SCALING_FACTOR); // truncation for 1st share
+  }
 
-
-
-MatrixXf predict(MatrixXf X, MatrixXf Y, MatrixXf w)
-{ MatrixXf pred = X * w;
-  MatrixXf diff = pred - Y;
-  MatrixXf loss = diff.transpose() * diff;
-  cout<< "Test Loss: "<< loss(0,0)/X.rows() << endl;
-  return pred;
+  return res;
 }
 
 // ==================================
-
-void bin(long n)
-{
-  long i;
-  cout << "0";
-  for (i = 1 << 30; i > 0; i = i / 2)
-  {
-    if((n & i) != 0) cout << "1";
-    else cout << "0";
-  }
-}
-
 
 int main(){
 
-  // MatrixXf X = MatrixXf::Random(1);
-  // MatrixXf Y = MatrixXf::Random(1);
-
-  //MatrixXd X(6,2);
-  //X << 4.3245,1.2341, 2.3451,8.34156, 1.437245,0.83464, 3.43425,2.76845, 1.3452,4.9234, 6.97324,7.3245;
-  //MatrixXd Y(6,1);
-  //Y << 3,1,4,3,1,2;
-  //MatrixXd w(2,1);
-  //w << 1.65921924,1.62628418;
-
-  // MatrixXf X(6,2);
-  // X << 4.243,1.244,-2.983,8.382,-1.534,0.913,3.142,2.434,-1.039,4.012,6.144,7.782;
-  // MatrixXf Y(6,1);
-  // Y << 2,14,-1,1,7,8;
-  // MatrixXf w(2,1);
-  // w << 1.65921924,1.62628418;
-
-  // cout << "Here is the matrix X:\n" << X <<endl;
-  // cout << "Here is the matrix w:\n" << w <<endl;
-  // //cout << "Here is the expected X.w:\n" << X * w <<endl;
-
-  // X = X * SCALING_FACTOR; // double to uint_64
-  // Y = Y * SCALING_FACTOR; // double to uint_64
-  // w = w * SCALING_FACTOR; // double to uint_64
-
-  // //cout << "Here is the SCALED matrix X:\n" << X <<endl;
-  // //cout << "Here is the SCALED matrix w:\n" << w <<endl;
-
-  // MatrixXi64 X_ = X.cast<uint64_t>();
-  // MatrixXi64 Y_ = Y.cast<uint64_t>();
-  // MatrixXi64 w_ = w.cast<uint64_t>();
-
-  // cout << "Here is the SCALED and MAPPED matrix X:\n" << X_ <<endl;
-  // cout << "Here is the SCALED and MAPPED matrix w:\n" << w_ <<endl;
-
-  // //MatrixXi64 U = X_ * w_;
-  // //U /= SCALING_FACTOR; // truncation
-
-  // //MatrixXd U_ = U.cast<double>();
-  // //U_ /= SCALING_FACTOR; // descaling
-
-  // //cout << "Here is the calculated X.w:\n" << U_ <<endl;
-
-  // // Figure NEGATIVE NUMBERS OUT
-
-  // //MatrixXd test1(3,1);
-  // //test1 << 1,2,-3;
-  // //test1 = test1 * SCALING_FACTOR;
-  // //MatrixXi64 T1 = test1.cast<uint64_t>();
-  // //cout << "Here is the SCALED and MAPPED matrix T1:\n" << T1 <<endl;
-
-  // //MatrixXd T1_ = uint64tofloat(T1);
-  // //cout << "Here is the DESCALED matrix T1_:\n" << T1_ <<endl;
-
-  // MatrixXi64 new_w = idealLinearRegression(X_,Y_,w_);
-  // MatrixXd new_w_f = uint64tofloat(new_w); // descaling
-
-  // cout<<"Final weights are: "<< new_w_f <<endl;
-
-
-  // =================================
-  // mapping example
-  
-  double X = 10.15723545348;
-  double Y = 5.23423452345;
-  double Z = X * Y; // the value we want to approximate
-  
-
-  cout << endl << "X, 1010.001010: "<< X << endl;
-  cout << "Y, 101.001111: "<< Y << endl;
-  cout << "Z, 110101.001010111: " << Z << endl << endl;
-
-  X = X * SCALING_FACTOR; 
-  Y = Y * SCALING_FACTOR;
+  double XX = 10.15723545348;
+  double YY = 5.23423452345;
+  double ZZ = XX * YY;
 
   cout << fixed;
-  cout << "After scaling by 13 bits i.e 2^13: " << endl;
-  cout << "X: "<< X << endl;
-  cout << "Y: "<< Y << endl << endl;
-  
-  cout << "After changing to integer " << endl;
-  uint64_t x = (uint64_t) X ;
-  uint64_t y = (uint64_t) Y ;
+  cout << "Z (floating arithmetic): " << ZZ << endl << endl;
 
-  cout << "x, 1010001010: "<< x << endl;
-  cout << "y, 101001111 : "<< y << endl << endl;
-  
-  uint64_t z = x * y;
-  cout << "z before truncation, 110101001010010110: "<< z << endl;
-  z /= SCALING_FACTOR; // truncation product
-  cout << "z after  truncation, 110101001010      : "<< z << endl << endl;
+  uint64_t XX_i = floattouint64(XX); // mapping XX to integer
+  uint64_t YY_i = floattouint64(YY); // mapping YY to integer
 
-  double zz = (double) z;
-  zz /= SCALING_FACTOR;
-  cout << "z after cast,        110101.001010     : "<< zz << endl << endl;
+  // no secret sharing setting
+  uint64_t ZZ_i = XX_i * YY_i;      // multiplying X and Y
+  uint64_t ZZ_t = truncate(ZZ_i, SCALING_FACTOR); // truncating Z
+  cout << "Z truncated (unshared setting)" << ZZ_t << endl;
+  double ZZ_f = uint64tofloat(ZZ_t);                 // mapping Z back to double
 
-  // // selecting certain columns of a Matrix
-  // Map<MatrixXf> X1(X.data()+5,5,X.cols());
+  cout << "Z (unshared setting): " << ZZ_f << endl;
 
-  // casting a matrix;
-  // MatrixXi x = X.cast<int>();
+  // secret sharing setting
+  uint64_t shares[2];
+  share(XX_i, shares);               // creating shares of XX
+  uint64_t XX_i0 = shares[0];
+  uint64_t XX_i1 = shares[1];
+
+  share(YY_i, shares);               // creating shares of XX
+  uint64_t YY_i0 = shares[0];
+  uint64_t YY_i1 = shares[1];
+
+  uint64_t ZZ_i0 = XX_i0 * YY_i0 + XX_i0 * YY_i1;  // 0th share of Z
+  uint64_t ZZ_i1 = XX_i1 * YY_i0 + XX_i1 * YY_i1;  // 1st share of Z
+
+  // // without truncation of shares, recreating Z first and then truncation
+  // uint64_t ZZ_rec = rec(ZZ_i0, ZZ_i1);
+  // uint64_t ZZ_trun = truncate(ZZ_rec, SCALING_FACTOR);
+  // cout << endl << "Z truncated (shared setting) " << ZZ_trun << endl;
+  // double ZZ_sf = uint64tofloat(ZZ_trun);
+
+  // cout << "Z (shares recreated, then truncated): " << ZZ_sf << endl;
+
+  // truncating both the shares, and then recreating
+  uint64_t ZZ_i0_t = truncate_share(ZZ_i0, SCALING_FACTOR, 0);
+  uint64_t ZZ_i1_t = truncate_share(ZZ_i1, SCALING_FACTOR, 1);
+  uint64_t ZZ_r = rec(ZZ_i0_t, ZZ_i1_t);
+  cout << endl << "Z truncated (shared setting) " << ZZ_r << endl;
+
+  double ZZ_shaf = uint64tofloat(ZZ_r);
+  cout << "Z (shares truncated, then recreated): " << ZZ_shaf << endl;
+
+  return 0;
 }
