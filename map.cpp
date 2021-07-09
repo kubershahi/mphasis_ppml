@@ -38,7 +38,7 @@ uint64_t floattouint64(double a)
   else
   {
     a = abs(a * SCALING_FACTOR);
-    res = (uint64_t) pow(2,64) - a;
+    res = (uint64_t) G - a;
     // cout<< res << " is negative"<<endl;
   }
   return res;
@@ -78,7 +78,7 @@ double uint64tofloat(uint64_t a)
   double res;
   if (a & (1UL << 63))
   {
-    res = -((double) G - a)/SCALING_FACTOR;
+    res = -((double) pow(2,64) - a)/SCALING_FACTOR;
     //cout<< res(i,j) << " is negative"<<endl;
   }
   else
@@ -209,7 +209,7 @@ uint64_t truncate_share(uint64_t a, int factor, int i)
 int main(){
 
   double XX = 10.15723545348;
-  double YY = 5.23423452345;
+  double YY = -5.23423452345;
   double ZZ = XX * YY;
 
   cout << fixed;

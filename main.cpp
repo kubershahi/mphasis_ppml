@@ -9,6 +9,7 @@ using namespace Eigen;
 #define SCALING_FACTOR 8192 // Precision of 13 bits
 typedef Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> MatrixXi64;
 typedef Eigen::Matrix<uint64_t, 1, Eigen::Dynamic, Eigen::RowMajor> RowVectorXi64;
+uint64_t G = pow(2,64);
 
 /*
 // ==================================== 
@@ -126,6 +127,7 @@ MatrixXd uint64tofloat(MatrixXi64 A)
   return res;
 }
 
+
 MatrixXi64 truncate(MatrixXi64 A, int factor)
 {
   MatrixXi64 res(A.rows(),A.cols());
@@ -136,7 +138,7 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
       uint64_t a = A(i,j);
       if (a & (1UL << 63))
       {
-        res(i,j) = pow(2,64) - (pow(2,64) - a)/factor;
+        res(i,j) = G - (G - a)/factor;
         //cout<< res(i,j) << " is negative"<<endl;
       }
       else
@@ -145,6 +147,32 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
         //cout<< res(i,j) << " is positive"<<endl;
       }
         
+    }
+  } 
+  return res;
+}
+
+// function that converts double Matrix to unit64 Matrix
+MatrixXi64 floattouint64(MatrixXd A)
+{
+  MatrixXi64 res(A.rows(),A.cols());
+
+  for (int i = 0; i < A.rows(); i++)
+  {
+    for (int j = 0; j < A.cols(); j++)
+    {
+      double a = A(i,j);
+      if ( a >= 0)
+      {
+        res(i,j) = (uint64_t) (a * SCALING_FACTOR);
+        //cout<< res(i,j) << " is positive"<<endl;
+      }
+      else
+      {
+        a = abs(a * SCALING_FACTOR);
+        res(i,j) = (uint64_t) pow(2,64) - a;
+        //cout<< res(i,j) << " is negative"<<endl;
+      }
     }
   } 
   return res;

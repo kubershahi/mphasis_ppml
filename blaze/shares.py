@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from gmpy2 import mpz
+import numpy as np
 
 @dataclass
 class angular_share:
@@ -8,6 +9,6 @@ class angular_share:
 
 @dataclass
 class special_share:
-	a: mpz = -1
-	b: mpz = -1
-	c: mpz = -1
+	a: np.uint64 = -1
+	b: np.uint64 = -1
+	c: np.uint64 = -1

@@ -12,7 +12,8 @@ import hashlib
 class primitives:
 
 	def float2int(x): # embed float value onto the integer ring
-		x = np.array(conf.converttoint64*(x), dtype = np.uint64)
+		#x = np.array(conf.converttoint64*(x), dtype = np.uint64)
+		x = np.uint64(conf.converttoint64*(x))
 		return x
 	
 
