@@ -18,13 +18,12 @@ int main()
   // MatrixXi x = X.cast<int>();
 
   uint64_t g = pow(2,64);
-  cout << g << endl;
-
   uint64_t temp = 3396261;
-  uint64_t sub = g - temp;
+
+  uint64_t sub = (uint64_t) pow(2,64) - 3396261;
   cout << fixed <<  sub << endl;
 
-  uint64_t res = g - sub;
+  uint64_t res = (uint64_t) pow(2,64) - sub;
   cout << res << endl;
   
   return 0;

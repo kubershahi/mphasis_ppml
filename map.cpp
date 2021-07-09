@@ -4,7 +4,7 @@
 #include <string>
 #include <list>
 #include <Eigen/Dense>
-#include <cmath>
+#include <math.h>
 #include <stdlib.h>
 
 using namespace std;
@@ -17,14 +17,12 @@ using namespace Eigen;
 2^16 = 65536
 2^20 = 1048576 
 2^24 = 16777216
+2^28 = 268435456
 
 */
 
-
 typedef Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> MatrixXi64;
 typedef Eigen::Matrix<uint64_t, 1, Eigen::Dynamic, Eigen::RowMajor> RowVectorXi64;
-
-uint64_t G = pow(2,64);
 
 // function that converts a single number from double to unit64
 uint64_t floattouint64(double a)
@@ -38,7 +36,7 @@ uint64_t floattouint64(double a)
   else
   {
     a = abs(a * SCALING_FACTOR);
-    res = (uint64_t) G - a;
+    res = (uint64_t) pow(2,64) - a;
     // cout<< res << " is negative"<<endl;
   }
   return res;
@@ -101,7 +99,7 @@ MatrixXd uint64tofloat(MatrixXi64 A)
       uint64_t a = A(i,j);
       if (a & (1UL << 63))
       {
-        res(i,j) = -((double) G - a)/SCALING_FACTOR;
+        res(i,j) = -((double) pow(2,64) - a)/SCALING_FACTOR;
         //cout<< res(i,j) << " is negative"<<endl;
       }
       else
@@ -153,7 +151,7 @@ uint64_t truncate(uint64_t a, int factor)
   uint64_t res;
   if (a & (1UL << 63))
   {
-    res = G - (G - a)/factor;
+    res = (uint64_t) pow(2,64) - ((uint64_t) pow(2,64) - a)/factor;
     //cout << res << " is negative"<<endl;
   }
   else
@@ -175,7 +173,7 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
       uint64_t a = A(i,j);
       if (a & (1UL << 63))
       {
-        res(i,j) = G - (G - a)/factor;
+        res(i,j) = (uint64_t) pow(2,64) - ( (uint64_t)pow(2,64) - a)/factor;
         //cout<< res(i,j) << " is negative"<<endl;
       }
       else
@@ -198,7 +196,7 @@ uint64_t truncate_share(uint64_t a, int factor, int i)
     res = truncate(a, SCALING_FACTOR); // truncation for 0th share
   }
   else{ 
-    res = G - truncate(G - a, SCALING_FACTOR); // truncation for 1st share
+    res = (uint64_t) pow(2,64) - truncate( (uint64_t) pow(2,64) - a, SCALING_FACTOR); // truncation for 1st share
   }
 
   return res;
@@ -208,7 +206,7 @@ uint64_t truncate_share(uint64_t a, int factor, int i)
 
 int main(){
 
-  double XX = 10.15723545348;
+  double XX = -10.15723545348;
   double YY = -5.23423452345;
   double ZZ = XX * YY;
 
@@ -249,7 +247,22 @@ int main(){
 
   // truncating both the shares, and then recreating
   uint64_t ZZ_i0_t = truncate_share(ZZ_i0, SCALING_FACTOR, 0);
+  cout << endl << "Truncated 0th share of Z: " << ZZ_i0_t << endl;
   uint64_t ZZ_i1_t = truncate_share(ZZ_i1, SCALING_FACTOR, 1);
+  cout << "Truncated 1st share of Z (treating as negative representation): " << ZZ_i1_t << endl;
+
+  // //truncating first share manually according to paper
+  // uint64_t ZZ_i1_sub = (uint64_t) ((uint64_t) pow(2,64) - ZZ_i1)/SCALING_FACTOR;
+  // uint64_t ZZ_i1_trun_test = (uint64_t) pow(2,64) - ZZ_i1_sub;
+  
+  // cout << "1st share of Z (treating as postive number): " << ZZ_i1_trun_test << endl;
+
+  // uint64_t sum = (ZZ_i0_t + ZZ_i1_trun_test) ;
+  // cout << "Sum: " << sum << endl;
+
+  // uint64_t result = (uint64_t) pow(2,64) - sum;
+  // cout << "Result: " << result << endl;
+
   uint64_t ZZ_r = rec(ZZ_i0_t, ZZ_i1_t);
   cout << endl << "Z truncated (shared setting) " << ZZ_r << endl;
 
