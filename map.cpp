@@ -147,7 +147,8 @@ MatrixXi64 rec(MatrixXi64 A, MatrixXi64 B)
 
 // function that truncates integer values
 uint64_t truncate(uint64_t a, int factor)
-{
+{ 
+  cout<< "G: "<<G<<endl;
   uint64_t res;
   if (a & (1UL << 63))
   {
@@ -165,6 +166,8 @@ uint64_t truncate(uint64_t a, int factor)
 // function that truncates integer values in a given matrix
 MatrixXi64 truncate(MatrixXi64 A, int factor)
 {
+
+  
   MatrixXi64 res(A.rows(),A.cols());
   for (int i = 0; i < A.rows(); i++)
   {
@@ -206,7 +209,10 @@ uint64_t truncate_share(uint64_t a, int factor, int i)
 
 int main(){
 
-  double XX = -10.15723545348;
+  uint64_t G = (uint64_t) pow(2,64) - 2;
+  cout<< "G (in main): "<<G<<endl;
+
+  double XX = 10.15723545348;
   double YY = -5.23423452345;
   double ZZ = XX * YY;
 
