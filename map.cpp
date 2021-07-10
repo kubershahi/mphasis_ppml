@@ -148,7 +148,6 @@ MatrixXi64 rec(MatrixXi64 A, MatrixXi64 B)
 // function that truncates integer values
 uint64_t truncate(uint64_t a, int factor)
 { 
-  cout<< "G: "<<G<<endl;
   uint64_t res;
   if (a & (1UL << 63))
   {

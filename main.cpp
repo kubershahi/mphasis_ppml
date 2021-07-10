@@ -103,55 +103,6 @@ MatrixXd rec(MatrixXd A, MatrixXd B)
 // Other Helper Functions for Floating Point Arithmetic: 
 // ===================================================== 
 
-MatrixXd uint64tofloat(MatrixXi64 A)
-{
-  MatrixXd res(A.rows(),A.cols());
-  for (int i = 0; i < A.rows(); i++)
-  {
-    for (int j = 0; j < A.cols(); j++)
-    {
-      uint64_t a = A(i,j);
-      if (a & (1UL << 63))
-      {
-        res(i,j) = -((double) pow(2,64) - a)/SCALING_FACTOR;
-        //cout<< res(i,j) << " is negative"<<endl;
-      }
-      else
-      {
-        res(i,j) = ((double) a)/SCALING_FACTOR;
-        //cout<< res(i,j) << " is positive"<<endl;
-      }
-        
-    }
-  } 
-  return res;
-}
-
-
-MatrixXi64 truncate(MatrixXi64 A, int factor)
-{
-  MatrixXi64 res(A.rows(),A.cols());
-  for (int i = 0; i < A.rows(); i++)
-  {
-    for (int j = 0; j < A.cols(); j++)
-    {
-      uint64_t a = A(i,j);
-      if (a & (1UL << 63))
-      {
-        res(i,j) = G - (G - a)/factor;
-        //cout<< res(i,j) << " is negative"<<endl;
-      }
-      else
-      {
-        res(i,j) = a/factor;
-        //cout<< res(i,j) << " is positive"<<endl;
-      }
-        
-    }
-  } 
-  return res;
-}
-
 // function that converts double Matrix to unit64 Matrix
 MatrixXi64 floattouint64(MatrixXd A)
 {
@@ -177,6 +128,59 @@ MatrixXi64 floattouint64(MatrixXd A)
   } 
   return res;
 }
+
+//function that coverts unit64 matrix to double matrix
+MatrixXd uint64tofloat(MatrixXi64 A)
+{
+  MatrixXd res(A.rows(),A.cols());
+  for (int i = 0; i < A.rows(); i++)
+  {
+    for (int j = 0; j < A.cols(); j++)
+    {
+      uint64_t a = A(i,j);
+      if (a & (1UL << 63))
+      {
+        res(i,j) = -((double) pow(2,64) - a)/SCALING_FACTOR;
+        //cout<< res(i,j) << " is negative"<<endl;
+      }
+      else
+      {
+        res(i,j) = ((double) a)/SCALING_FACTOR;
+        //cout<< res(i,j) << " is positive"<<endl;
+      }
+        
+    }
+  } 
+  return res;
+}
+
+// function that truncates integer values in a given matrix
+MatrixXi64 truncate(MatrixXi64 A, int factor)
+{
+
+  
+  MatrixXi64 res(A.rows(),A.cols());
+  for (int i = 0; i < A.rows(); i++)
+  {
+    for (int j = 0; j < A.cols(); j++)
+    {
+      uint64_t a = A(i,j);
+      if (a & (1UL << 63))
+      {
+        res(i,j) = (uint64_t) pow(2,64) - ( (uint64_t)pow(2,64) - a)/factor;
+        //cout<< res(i,j) << " is negative"<<endl;
+      }
+      else
+      {
+        res(i,j) = a/factor;
+        //cout<< res(i,j) << " is positive"<<endl;
+      }
+        
+    }
+  } 
+  return res;
+}
+
 
 // ====================================
 // Secure Multiplication using Beavers' Triplets: 
@@ -619,7 +623,7 @@ int main(){
   // Sanity Check data:
   //==========================================
   MatrixXd X2(6,2);
-  X2 << 4,1,2,8,1,0,3,2,1,4,6,7;
+  X2 << 4,1,-2.4,8,1,0.11,3,2.3,1,4,6.6,7.32;
   MatrixXd Y2(6,1);
   Y2 << 2,-14,1,-1,-7,-8;
   MatrixXd w2(2,1);
@@ -669,19 +673,19 @@ int main(){
   cout << "FLOATING LINEAR REGRESSION (SGD):"<<endl;
   cout << "=============================="<<endl<<endl;
 
-  X2 = X2 * SCALING_FACTOR; // double to uint_64
-  Y2 = Y2 * SCALING_FACTOR; // double to uint_64
+  MatrixXi64 X_ = floattouint64(X1); // double to uint_64
+  MatrixXi64 Y_ = floattouint64(Y1); // double to uint_64
   //w1 = MatrixXd::Random(d,1);
-  w2 = w2 * SCALING_FACTOR; // double to uint_64
+  MatrixXi64 w_ = floattouint64(w1); // double to uint_64
 
-  MatrixXi64 X_ = X2.cast<uint64_t>();
-  MatrixXi64 Y_ = Y2.cast<uint64_t>();
-  MatrixXi64 w_ = w2.cast<uint64_t>();
+  //MatrixXi64 X_ = X2.cast<uint64_t>();
+  //MatrixXi64 Y_ = Y2.cast<uint64_t>();
+  //MatrixXi64 w_ = w2.cast<uint64_t>();
 
   MatrixXi64 new_w_ = idealFloatingLinearRegression(X_,Y_,w_);
   MatrixXd new_w_f = uint64tofloat(new_w_); // descaling
 
-  cout<<"Final weights are: "<< new_w_f <<endl;
+  //cout<<"Final weights are: "<< new_w_f <<endl;
 
 }
 
