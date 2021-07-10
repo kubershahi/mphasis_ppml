@@ -652,7 +652,7 @@ int main(){
     Y1.row(i) = VectorXd::Map(&Y_train[i],1)/10.0;
   }
 
-  cout << "Working: " << endl;
+  // cout << "Working: " << endl;
 
   vector<vector<double> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
   vector<double> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
@@ -737,7 +737,6 @@ int main(){
     cout << "PP Prediction: " << pred_p <<endl;
   }
   */
- 
   cout << "=============================="<<endl;
   cout << "UINT-64 LINEAR REGRESSION (SGD):"<<endl;
   cout << "=============================="<<endl<<endl;
