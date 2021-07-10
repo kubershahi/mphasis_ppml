@@ -15,16 +15,25 @@ using namespace std;
 using namespace Eigen;
 
 
-#define SCALING_FACTOR 66536 // Precision of 16 bits
+#define SCALING_FACTOR 262144   // Precision of 16 bits
+/*
+
+2^16 = 65536
+2^18 = 262144
+2^20 = 1048576 
+2^24 = 16777216
+2^28 = 268435456
+
+*/
 typedef Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> MatrixXi64;
 typedef Eigen::Matrix<uint64_t, 1, Eigen::Dynamic, Eigen::RowMajor> RowVectorXi64;
 
 // for medical dataset
-int N = 1;
+int N = 1070;
 int N_test = 268;
 int d = 5;
-int B = 1;
-int NUM_EPOCHS = 1;
+int B = 2;
+int NUM_EPOCHS = 10;
 
 
 // function that takes float to unit64
@@ -54,7 +63,7 @@ MatrixXi64 floattouint64(MatrixXd A)
 }
 
 
-// function that takes unit64 to float
+// function that takes uint64 to float
 MatrixXd uint64tofloat(MatrixXi64 A)
 {
   MatrixXd res(A.rows(),A.cols());
@@ -90,7 +99,7 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
       uint64_t a = A(i,j);
       if (a & (1UL << 63))
       {
-        res(i,j) = pow(2,64) - (pow(2,64) - a)/factor;
+        res(i,j) = (uint64_t) pow(2,64) - ((uint64_t) pow(2,64) - a)/factor;
         //cout<< res(i,j) << " is negative"<<endl;
       }
       else
@@ -184,20 +193,42 @@ MatrixXi64 truncatedLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w) /
 }
 
 int main(){
-  // Validata Data
-  MatrixXd X_val(1,5);
-  X_val << 18.0, 1.0,	33.77, 1.0, 0.0;
-  MatrixXd Y_val(1,1);
-  Y_val << 1725.5523;
-  MatrixXd w_val = MatrixXd::Random(5,1);
-  //cout << "Here is the matrix X_val:\n" << X_val <<endl;
-  //cout << "Here is the matrix Y_val:\n" << Y_val <<endl;
-  cout <<endl << "Here is the matrix w_val:\n" << w_val <<endl;
 
-  MatrixXi64 w_i = floattouint64(w_val);
+
+  // loading data
+
+  cout<<"Reading Data:"<<endl;
+  // loading training data
+  vector<vector<double> > X_train_input;   // dim: 60000 x 784
+  vector<double> Y_train_input;            // dim: 60000 x 1  
+  
+  read_insurance_data("datasets/medical/insurance_train.csv", X_train_input, Y_train_input); // for medical dataset
+  // read_data("datasets/mnist/mnist_train.csv", X_train_input, Y_train_input);  
+
+  MatrixXd X_train(N, d); // 60000, 784
+  MatrixXd Y_train(N, 1); // 60000, 1  
+
+  for (int i = 0; i < N; i++)
+  {
+    X_train.row(i) = VectorXd::Map(&X_train_input[i][0], d)/100.0;
+    Y_train.row(i) = VectorXd::Map(&Y_train_input[i],1);
+  }
+  
+  // // Validation single example
+  // MatrixXd X_val(1,5);
+  // X_val << 18.0, 1.0,	33.77, 1.0, 0.0;
+  // MatrixXd Y_val(1,1);
+  // Y_val << 1725.5523;
+  // //cout << "Here is the matrix X_val:\n" << X_val <<endl;
+  // //cout << "Here is the matrix Y_val:\n" << Y_val <<endl;
+
+  MatrixXd w = MatrixXd::Random(d,1);
+  cout <<endl << "Here is the weight matrix (raw):\n" << w <<endl;
+
+  MatrixXi64 w_i = floattouint64(w);
   MatrixXd w_f = uint64tofloat(w_i);
 
-  cout <<endl << "Here is the matrix w_f:\n" << w_f <<endl;
+  cout <<endl << "Here is the matrix matrix (mapped):\n" << w_f <<endl;
   //==========================================
 
   //==========================================
@@ -207,7 +238,7 @@ int main(){
   cout << "=============================="<<endl;
   cout << "IDEAL LINEAR REGRESSION (SGD):"<<endl;
   cout << "=============================="<<endl<<endl;
-  MatrixXd ideal_w = idealLinearRegression(X_val,Y_val,w_val);
+  MatrixXd ideal_w = idealLinearRegression(X_train,Y_train,w);
   cout << endl << "Final weights (under Ideal Functionality) are:\n" << ideal_w <<endl<<endl;
 
   cout << "=============================="<<endl;
@@ -223,9 +254,9 @@ int main(){
   // MatrixXi64 Y_ = Y2.cast<uint64_t>();
   // MatrixXi64 w_ = w2.cast<uint64_t>();
 
-  MatrixXi64 X_ = floattouint64(X_val);
-  MatrixXi64 Y_ = floattouint64(Y_val);
-  MatrixXi64 w_ = floattouint64(w_val);
+  MatrixXi64 X_ = floattouint64(X_train);
+  MatrixXi64 Y_ = floattouint64(Y_train);
+  MatrixXi64 w_ = floattouint64(w);
 
   // cout << "Here is the matrix w_:\n" << w_ <<endl;
 
