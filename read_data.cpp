@@ -1,10 +1,11 @@
+#include "read_data.hpp"
+
 #include <vector>   // for vector operations
 #include <string>   // for string operations
 #include <iostream> // input output operation: cout
 #include <fstream>  // file stream operation: ifstream
 #include <sstream>  // string stream operation: istringstream
-#include <algorithm>    // replace functionality
-#include "read_data.hpp"
+#include <algorithm>  // replace functionality
 #include <Eigen/Dense>
 
 /* 
