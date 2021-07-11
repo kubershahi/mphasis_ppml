@@ -15,7 +15,7 @@ using namespace std;
 using namespace Eigen;
 
 
-#define SCALING_FACTOR 262144   // Precision of 16 bits
+#define SCALING_FACTOR 262144   // Precision of 18 bits
 /*
 
 2^16 = 65536
