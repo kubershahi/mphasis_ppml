@@ -52,7 +52,8 @@ int main(){
   cout<<"Select Dataset (enter corresponding digit):"<<endl;
   cout<<"\t [1] MNIST"<<endl;
   cout<<"\t [2] Medical Insurance"<<endl;
-  cout<<"\t [3] Sanity Check"<<endl;
+  cout<<"\t [3] Binary MNIST"<<endl;
+  cout<<"\t [4] Sanity Check"<<endl;
   int selection = 0;
   cout<<"Enter selection: ";
   cin>>selection;
@@ -143,6 +144,52 @@ int main(){
   for (int i = 0; i < N_test; i++)
   {
     X1_test.row(i) = VectorXd::Map(&X_test[i][0], d);
+    Y1_test.row(i) = VectorXd::Map(&Y_test[i],1);
+  }
+
+  MatrixXd w1 = MatrixXd::Random(d,1);
+
+  X = X1;
+  Y = Y1;
+  w = w1;
+
+  }
+
+  if (selection == 3){
+
+  //Binary MNIST
+  :: N = 10000; // 10000
+  :: N_test = 1000; // 1000
+  :: d = 784; //784
+  :: B = 128; //128
+
+  cout<<"Reading Data:"<<endl;
+  // loading mnist dataset: training and testing portion separately
+  vector<vector<double> > X_train;   // dim: 60000 x 784, 60000 training samples with 784 features
+  vector<double> Y_train;            // dim: 60000 x 1  , the true label of each training sample
+  
+  read_data("datasets/binary_mnist/mnist_train.csv", X_train, Y_train);             // for MNIST dataset
+
+  MatrixXd X1(N, d); // 60000, 784
+  MatrixXd Y1(N, 1); // 60000, 1
+
+  for (int i = 0; i < N; i++)
+  {
+    X1.row(i) = VectorXd::Map(&X_train[i][0], d)/256.0;
+    Y1.row(i) = VectorXd::Map(&Y_train[i],1);
+  }
+
+  vector<vector<double> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
+  vector<double> Y_test;             // dim: 10000 x 1  , the true label of each testing sample
+
+  read_data("datasets/binary_mnist/mnist_test.csv", X_test, Y_test);                  // for MNIST dataset
+
+  MatrixXd X1_test(N_test, d); // 1000, 784
+  MatrixXd Y1_test(N_test, 1); // 1000, 1
+
+  for (int i = 0; i < N_test; i++)
+  {
+    X1_test.row(i) = VectorXd::Map(&X_test[i][0], d)/256.0;
     Y1_test.row(i) = VectorXd::Map(&Y_test[i],1);
   }
 

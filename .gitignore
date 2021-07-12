@@ -136,3 +136,4 @@ dmypy.json
 
 #mnist
 /datasets/mnist
+/datasets/binary_mnist
