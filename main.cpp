@@ -46,7 +46,7 @@ int NUM_EPOCHS = 5;
 int main(){
 
   //==========================================
-  // Loadin and Pre processing data:
+  // Loading and Pre-Processing data:
   //==========================================
 
   cout<<"Select Dataset (enter corresponding digit):"<<endl;
