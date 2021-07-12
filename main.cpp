@@ -121,13 +121,13 @@ int main(){
   
   read_insurance_data("datasets/medical/insurance_train.csv", X_train, Y_train); // for medical dataset  
 
-  MatrixXd X1(N, d); // 60000, 784
-  MatrixXd Y1(N, 1); // 60000, 1
+  MatrixXd X3(N, d); // 60000, 784
+  MatrixXd Y3(N, 1); // 60000, 1
 
   for (int i = 0; i < N; i++)
   {
-    X1.row(i) = VectorXd::Map(&X_train[i][0], d)/100.0;
-    Y1.row(i) = VectorXd::Map(&Y_train[i],1);
+    X3.row(i) = VectorXd::Map(&X_train[i][0], d)/100.0;
+    Y3.row(i) = VectorXd::Map(&Y_train[i],1);
   }
 
   // cout << "Working: " << endl;
@@ -138,24 +138,26 @@ int main(){
 
   read_insurance_data("datasets/medical/insurance_test.csv", X_test, Y_test); // for medical dataset
 
-  MatrixXd X1_test(N_test, d); // 1000, 784
-  MatrixXd Y1_test(N_test, 1); // 1000, 1
+  MatrixXd X3_test(N_test, d); // 1000, 784
+  MatrixXd Y3_test(N_test, 1); // 1000, 1
 
   for (int i = 0; i < N_test; i++)
   {
-    X1_test.row(i) = VectorXd::Map(&X_test[i][0], d);
-    Y1_test.row(i) = VectorXd::Map(&Y_test[i],1);
+    X3_test.row(i) = VectorXd::Map(&X_test[i][0], d)/100.0;
+    Y3_test.row(i) = VectorXd::Map(&Y_test[i],1);
   }
 
-  MatrixXd w1 = MatrixXd::Random(d,1);
+  MatrixXd w3 = MatrixXd::Random(d,1);
 
-  X = X1;
-  Y = Y1;
-  w = w1;
+  X = X3;
+  Y = Y3;
+  w = w3;
+
+  cout<<X<<endl;
 
   }
 
-  if (selection == 3){
+  else if (selection == 3){
 
   //Binary MNIST
   :: N = 10000; // 10000
