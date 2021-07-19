@@ -9,6 +9,8 @@ class angular_share:
 
 @dataclass
 class special_share:
-	a: np.uint64 = -1
-	b: np.uint64 = -1
-	c: np.uint64 = -1
+	def __init__(self, num):
+		self.party_num = num
+		self.a = np.uint64(-1)
+		self.b = np.uint64(-1)
+		self.c = np.uint64(-1)
