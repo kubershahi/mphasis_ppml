@@ -1,5 +1,5 @@
-#ifndef READ_DATA_HPP
-#define READ_DATA_HPP
+#ifndef SECML_READ_DATA_HPP
+#define SECML_READ_DATA_HPP
 
 #include<vector>
 #include<Eigen/Dense>

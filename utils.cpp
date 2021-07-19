@@ -56,10 +56,10 @@ MatrixXd rec(MatrixXd A, MatrixXd B)
 }
 
 // =====================================================
-// Helper Functions for Floating Point Operations: 
+// Helper Functions for Floating Point Number Operations: 
 // ===================================================== 
 
-// function that converts double Matrix to unit64 Matrix
+// function that converts double Matrix to uint64 Matrix
 MatrixXi64 floattouint64(MatrixXd A)
 {
   MatrixXi64 res(A.rows(),A.cols());
@@ -85,7 +85,7 @@ MatrixXi64 floattouint64(MatrixXd A)
   return res;
 }
 
-//function that coverts unit64 matrix to double matrix
+//function that coverts uint64 matrix to double matrix
 MatrixXd uint64tofloat(MatrixXi64 A)
 {
   MatrixXd res(A.rows(),A.cols());
@@ -110,11 +110,9 @@ MatrixXd uint64tofloat(MatrixXi64 A)
   return res;
 }
 
-// function that truncates integer values in a given matrix
+// function that truncates integer values in a given matrix by a factor
 MatrixXi64 truncate(MatrixXi64 A, int factor)
 {
-
-  
   MatrixXi64 res(A.rows(),A.cols());
   for (int i = 0; i < A.rows(); i++)
   {
@@ -167,7 +165,7 @@ MatrixXi64 mult(int i, MatrixXi64 A, MatrixXi64 B, MatrixXi64 E, MatrixXi64 F, M
 	return product;
 }
 
-// For floating point inputs
+// For floating point numbersinputs
 MatrixXd mult(int i, MatrixXd A, MatrixXd B, MatrixXd E, MatrixXd F, MatrixXd Z)
 { 
   //MatrixXf pp = E*F + U*F + E*V + Z;
@@ -184,6 +182,7 @@ MatrixXd mult(int i, MatrixXd A, MatrixXd B, MatrixXd E, MatrixXd F, MatrixXd Z)
 // Helper Functions for Linear Regression: 
 // ================================================== 
 
+// function that predicts the output given trained weights and computes the loss
 MatrixXd predict(MatrixXd X, MatrixXd Y, MatrixXd w)
 { MatrixXd pred = X * w;
   MatrixXd diff = pred - Y;
@@ -192,5 +191,6 @@ MatrixXd predict(MatrixXd X, MatrixXd Y, MatrixXd w)
   return pred;
 }
 
+//function that just predicts the output
 MatrixXd predict(MatrixXd X, MatrixXd w)
 { return X * w;}
