@@ -19,4 +19,3 @@ MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w);
 MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w); 
 
 #endif // SECML_UTIL_HPP
-

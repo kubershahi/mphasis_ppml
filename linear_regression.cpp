@@ -17,7 +17,7 @@ using namespace Eigen;
 MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
 {
   // w -= a/|B| X^T .(X.w - Y)
-  int t = (N * NUM_EPOCHS)/B; // E = 1
+  int t = (N * NUM_EPOCHS)/B; 
   for(int i = 0; i < t; i ++)
   {
     MatrixXi YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
@@ -31,15 +31,13 @@ MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
 // Non-PP Linear Regression for floating point inputs
 MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
 {
-
   //cout<<"Initial weights: "<< endl << w <<endl;
   for(int e = 0; e < NUM_EPOCHS; e ++)
   { cout<< "Epoch Number: "<< e+1;
-    cout<<" Progress: ";
     float epoch_loss = 0.0;
 
     for(int i = 0; i < int(N/B); i ++)
-    { cout<<"=";
+    { 
       MatrixXd YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
       //cout<< "yhat: "<< endl << YY << endl;
       MatrixXd D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
@@ -74,12 +72,10 @@ MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
 
   for(int e = 0; e < NUM_EPOCHS; e ++)
   { cout<< "Epoch Number: "<< e+1;
-    cout<<" Progress: ";
     float epoch_loss = 0.0;
 
     for(int i = 0; i < int(N/B); i ++)
     { 
-      cout<<"=";
       MatrixXi64 YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
 
       //truncation:
@@ -191,12 +187,10 @@ MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
 
   for(int e = 0; e < NUM_EPOCHS; e++)
   { cout<< "Epoch Number: "<< e+1;
-    cout<<" Progress: ";
     float epoch_loss = 0.0;
 
     for(int j = 0; j < int(N/B); j++)
     {
-      cout<<"=";
       MatrixXi64 F_0 = w_0 - V_0.col(j);
       MatrixXi64 F_1 = w_1 - V_1.col(j);
       MatrixXi64 F = rec(F_0, F_1);
@@ -258,7 +252,6 @@ MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
     cout<< "Loss: "<< epoch_loss/N << endl;
   }
   
-
   return rec(w_0, w_1);
 }
 
@@ -328,12 +321,10 @@ MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
   // ===========================
   for(int e = 0; e < NUM_EPOCHS; e++)
   { cout<< "Epoch Number: "<< e+1;
-    cout<<" Progress: ";
     float epoch_loss = 0.0;
 
     for(int j = 0; j < int(N/B); j++)
     {
-      cout<<"=";
       MatrixXd F_0 = w_0 - V_0.col(j);
       MatrixXd F_1 = w_1 - V_1.col(j);
       MatrixXd F = rec(F_0, F_1);
@@ -369,7 +360,5 @@ MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
     cout<< "Loss: "<< epoch_loss/N << endl;
   }
   
-
   return rec(w_0, w_1);
 }
-
