@@ -18,7 +18,7 @@ class primitives:
 	
 
 	def int2float(x,scale=1<<conf.precision): # convert a value in the integer ring back to float
-		y=0
+		y = 0
 		if(x > (2**(conf.l-1))-1):
 			x = (2**conf.l) - x
 			y = np.uint64(x)
