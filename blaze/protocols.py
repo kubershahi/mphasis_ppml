@@ -3,6 +3,7 @@ import sys
 from shares import angular_share as ang
 from shares import special_share as spc
 from primitives import primitives as prim
+from config import config as conf
 import socket
 import pickle
 import random
@@ -13,6 +14,47 @@ import time
 # import os
 
 class protocols:
+
+	def mult(z0, z1, z2, x0, x1, x2, y0, y1, y2):
+
+		alpha_x = prim.rec_additive(x0.a, x0.b)
+		alpha_y = prim.rec_additive(y0.a, y0.b)
+		alpha_x_1 = x0.a
+		alpha_x_2 = x0.b
+		alpha_y_1 = y0.a
+		alpha_y_2 = y0.b
+		beta_x = x1.b
+		beta_y = y1.b
+
+		alpha_z = prim.float2int(random.randint(1, 10))
+		(alpha_z_1, alpha_z_2) = prim.additive_sharing(alpha_z)
+
+		# P0 calculates:
+		alpha_x_alpha_y = alpha_x * alpha_y
+		(alpha_x_alpha_y_1, alpha_x_alpha_y_2) = prim.additive_sharing(alpha_x_alpha_y)
+
+		# P1 calculates:
+		beta_z_1 = - (beta_x * alpha_y_1) - (beta_y * alpha_x_1) + alpha_x_alpha_y_1 + alpha_z_1
+
+		# P2 calculates:
+		beta_z_2 = (beta_x * beta_y) - (beta_x * alpha_y_2) - (beta_y * alpha_x_2) + alpha_x_alpha_y_2 + alpha_z_2
+
+		beta_z = beta_z_1 + beta_z_2
+		gamma_z = prim.float2int(random.randint(1, 10)) # change later
+
+		z0.a = (alpha_z_1)
+		z0.b = (alpha_z_2)
+		z0.c = ((beta_z) + (gamma_z)) % (conf.modl)
+
+		z1.a = (alpha_z_1)
+		z1.b = (beta_z)
+		z1.c = (gamma_z)
+
+		z2.a = (alpha_z_2)
+		z2.b = (beta_z)
+		z2.c = (gamma_z)
+		
+		return (z0, z1, z2)
 
 	def mulZK(d,e): 
 

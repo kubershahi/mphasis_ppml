@@ -10,55 +10,28 @@ from gmpy2 import mpz
 
 np.seterr(over='ignore')
 
-def additive_sharing(a):
-	a1 = prim.float2int(random.randint(1, 10))
-	a2 = a - a1
-	return (a1,a2)
+def add(x0, x1, x2, y0, y1, y2):
 
-def rec_special(share_1, share_2):
-	if (share_1.party_num == 0 and (share_2.party_num == 1 or share_2.party_num == 2)):
-		alpha_val = share_1.a + share_1.b
-	elif (share_1.party_num == 1 and share_2.party_num == 2):
-		alpha_val = share_1.a + share_2.a
-	
-	val = share_2.b - alpha_val
-	return val
+	(z0, z1, z2) = prim.special_sharing(prim.float2int(0))
+	z0.a = x0.a + y0.a
+	z0.b = x0.b + y0.b
+	z0.c = x0.c + y0.c
 
-def mult(z0, z1, z2, alpha_x, alpha_y, alpha_x_1, alpha_x_2, alpha_y_1, alpha_y_2, beta_x, beta_y):
-	alpha_z = prim.float2int(random.randint(1, 10))
-	(alpha_z_1, alpha_z_2) = additive_sharing(alpha_z)
+	z1.a = x1.a + y1.a
+	z1.b = x1.b + y1.b
+	z1.c = x1.c + y1.c
 
-	# P0 calculates:
-	alpha_x_alpha_y = alpha_x * alpha_y
-	(alpha_x_alpha_y_1, alpha_x_alpha_y_2) = additive_sharing(alpha_x_alpha_y)
+	z2.a = x2.a + y2.a
+	z2.b = x2.b + y2.b
+	z2.c = x2.c + y2.c
 
-	# P1 calculates:
-	beta_z_1 = - (beta_x * alpha_y_1) - (beta_y * alpha_x_1) + alpha_x_alpha_y_1 + alpha_z_1
-
-	# P2 calculates:
-	beta_z_2 = (beta_x * beta_y) - (beta_x * alpha_y_2) - (beta_y * alpha_x_2) + alpha_x_alpha_y_2 + alpha_z_2
-
-	beta_z = beta_z_1 + beta_z_2
-	gamma_z = prim.float2int(random.randint(1, 10)) # change later
-
-	z0.a = (alpha_z_1)
-	z0.b = (alpha_z_2)
-	z0.c = ((beta_z) + (gamma_z)) % (conf.modl)
-
-	z1.a = (alpha_z_1)
-	z1.b = (beta_z)
-	z1.c = (gamma_z)
-
-	z2.a = (alpha_z_2)
-	z2.b = (beta_z)
-	z2.c = (gamma_z)
-	
 	return (z0, z1, z2)
+
+
 
 def main():
 
 	print("=== Testing Integer Enbedding ===")
-	
 	nums = np.array([9, 12.21, -12.21])
 	i = np.array([0.0,0.0,0.0])
 	print("Numbers are 9, 12.21, -12.21")
@@ -67,116 +40,79 @@ def main():
 	for j in range(0, len(f)):
 		i[j] = prim.int2float(f[j])
 	print(f"OG Float is: {i}")
-
 	print("====================== \n \n")
 
 	print("=== Testing Special Sharing Semantics ===")
+	x = prim.float2int(30.1242)
+	y = prim.float2int(14.9938)
 
-	x0 = spc(0)
-	x1 = spc(1)
-	x2 = spc(2)
+	(x0, x1, x2) = prim.special_sharing(x)
+	(y0, y1, y2) = prim.special_sharing(y)
 
-	y0 = spc(0)
-	y1 = spc(1)
-	y2 = spc(2)
-
-	x = prim.float2int(3)
-	y = prim.float2int(4)
-
-	alpha_x = prim.float2int(random.randint(1, 10))
-	alpha_y = prim.float2int(random.randint(1, 10))
-	gamma_x = prim.float2int(random.randint(1, 10))
-	gamma_y = prim.float2int(random.randint(1, 10))
-
-	beta_x = alpha_x + x
-	beta_y = alpha_y + y
-
-	(alpha_x_1, alpha_x_2) = additive_sharing(alpha_x)
-	(alpha_y_1, alpha_y_2) = additive_sharing(alpha_y)
-
-	x0.a = (alpha_x_1)
-	x0.b = (alpha_x_2)
-	x0.c = (beta_x + gamma_x) % (conf.modl)
-
-	x1.a = (alpha_x_1)
-	x1.b = (beta_x)
-	x1.c = (gamma_x)
-
-	x2.a = (alpha_x_2)
-	x2.b = (beta_x)
-	x2.c = (gamma_x)
-
-	y0.a = (alpha_y_1)
-	y0.b = (alpha_y_2)
-	y0.c = (beta_y + gamma_y) % (conf.modl)
-
-	y1.a = (alpha_y_1)
-	y1.b = (beta_y)
-	y1.c = (gamma_y)
-
-	y2.a = (alpha_y_2)
-	y2.b = (beta_y)
-	y2.c = (gamma_y)
-
-
-	#print(type(a.x1))
 	print(f"Special Shares of x: {prim.int2float(x)}")
-	print(f"{x0.a} --> {prim.int2float(x0.a)}")
-	print(f"{x0.b} --> {prim.int2float(x0.b)}")
-	print(f"{x0.c} --> {prim.int2float(x0.c)}")
-	print(f"{x1.a} --> {prim.int2float(x1.a)}")
-	print(f"{x1.b} --> {prim.int2float(x1.b)}")
-	print(f"{x1.c} --> {prim.int2float(x1.c)}")
-	print(f"{x2.a} --> {prim.int2float(x2.a)}")
-	print(f"{x2.b} --> {prim.int2float(x2.b)}")
-	print(f"{x2.c} --> {prim.int2float(x2.c)}")
-	print(f"Reconstructed value of x: {prim.int2float(rec_special(x0, x1))} \n")
+	prim.print_special(x0, x1, x2)
+	print(f"Reconstructed value of x: {prim.int2float(prim.rec_special(x0, x1))} \n")
 
 	print(f"Special Shares of y: {prim.int2float(y)}")
-	print(f"{y0.a} --> {prim.int2float(y0.a)}")
-	print(f"{y0.b} --> {prim.int2float(y0.b)}")
-	print(f"{y0.c} --> {prim.int2float(y0.c)}")
-	print(f"{y1.a} --> {prim.int2float(y1.a)}")
-	print(f"{y1.b} --> {prim.int2float(y1.b)}")
-	print(f"{y1.c} --> {prim.int2float(y1.c)}")
-	print(f"{y2.a} --> {prim.int2float(y2.a)}")
-	print(f"{y2.b} --> {prim.int2float(y2.b)}")
-	print(f"{y2.c} --> {prim.int2float(y2.c)}")
-	print(f"Reconstructed value of x: {prim.int2float(rec_special(y0, y1))} \n")
-
-	
+	prim.print_special(y0, y1, y2)
+	print(f"Reconstructed value of x: {prim.int2float(prim.rec_special(y0, y1))} \n")
 	print("====================== \n \n")
+	
 	# muliplication
 	print("=== Testing Multipication (Honest Parties) ===")
-
 	# z = x.y
 	z0 = spc(0)
 	z1 = spc(1)
 	z2 = spc(2)
-
-	(z0, z1, z2) = mult(z0, z1, z2, alpha_x, alpha_y, alpha_x_1, alpha_x_2, alpha_y_1, alpha_y_2, beta_x, beta_y)
+	(z0, z1, z2) = protocols.mult(z0, z1, z2, x0, x1, x2, y0, y1, y2) 
 
 	print(f"Special Shares of z = x.y: {prim.int2float(x) * prim.int2float(y)}")
-	print(f"{z0.a} --> {prim.int2float(z0.a)}")
-	print(f"{z0.b} --> {prim.int2float(z0.b)}")
-	print(f"{z0.c} --> {prim.int2float(z0.c)}")
-	print(f"{z1.a} --> {prim.int2float(z1.a)}")
-	print(f"{z1.b} --> {prim.int2float(z1.b)}")
-	print(f"{z1.c} --> {prim.int2float(z1.c)}")
-	print(f"{z2.a} --> {prim.int2float(z2.a)}")
-	print(f"{z2.b} --> {prim.int2float(z2.b)}")
-	print(f"{z2.c} --> {prim.int2float(z2.c)}")
-	print(f"Reconstructed value of z: {prim.int2float(prim.int2float(rec_special(z0, z1)))}")
-
+	prim.print_special(z0, z1, z2)
+	print(f"Reconstructed value of z: {prim.int2float(prim.int2float(prim.rec_special(z0, z1)))}")
 	print("====================== \n \n")
-	sys.exit("End of testing (works upto here)")
 	
+	
+	
+
+	# Dot Product
+	x = np.array([1,2,3])
+	y = np.array([4,5,6])
+	z = np.array([0,0,0])
+	x = prim.float2int(x)
+	y = prim.float2int(y)
+
+	x0 = np.array([spc(0),spc(0),spc(0)])
+	x1 = np.array([spc(1),spc(1),spc(1)])
+	x2 = np.array([spc(2),spc(2),spc(2)])
+
+	y0 = np.array([spc(0),spc(0),spc(0)])
+	y1 = np.array([spc(1),spc(1),spc(1)])
+	y2 = np.array([spc(2),spc(2),spc(2)])
+
+	z0 = np.array([spc(0),spc(0),spc(0)])
+	z1 = np.array([spc(1),spc(1),spc(1)])
+	z2 = np.array([spc(2),spc(2),spc(2)])
+
+	z0_sum = spc(0)
+	z1_sum = spc(1)
+	z2_sum = spc(2)
+
+	for i in range(0, len(x)):
+		(x0[i], x1[i], x2[i]) = prim.special_sharing(x[i])
+		(y0[i], y1[i], y2[i]) = prim.special_sharing(y[i])
+		(z0[i], z1[i], z2[i]) = protocols.mult(z0[i], z1[i], z2[i], x0[i], x1[i], x2[i], y0[i], y1[i], y2[i])
+		print(f"Reconstructed value of x_i. y_i: {prim.int2float(prim.int2float(prim.rec_special(z0[i], z1[i])))}")
+		(z0_sum, z1_sum, z2_sum) = add(z0_sum, z1_sum, z2_sum, z0[i], z1[i], z2[i])
+
+	print(f"Reconstructed value of z (dot product): {prim.int2float(prim.int2float(prim.rec_special(z0_sum, z1_sum)))}")
+	sys.exit("End of testing (works upto here)")
+
 	# Truncation
 	print("=== Testing Truncation ===")
 
 	r = prim.float2int(12.3)
 	r0 = r
-	(r1, r2) = additive_sharing(r)
+	(r1, r2) = prim.additive_sharing(r)
 
 	rd = int(r//(2**13))
 
@@ -188,7 +124,7 @@ def main():
 	rd1 = spc(1)
 	rd2 = spc(2)
 
-	(alpha_rd_1, alpha_rd_2) = additive_sharing(alpha_rd)
+	(alpha_rd_1, alpha_rd_2) = prim.additive_sharing(alpha_rd)
 
 	rd0.a = (alpha_rd_1)
 	rd0.b = (alpha_rd_2)
@@ -222,7 +158,7 @@ def main():
 	beta_zrd = alpha_zrd + zrd
 	gamma_zrd = prim.float2int(random.randint(1, 20))
 
-	(alpha_zrd_1, alpha_zrd_2) = additive_sharing(alpha_zrd)
+	(alpha_zrd_1, alpha_zrd_2) = prim.additive_sharing(alpha_zrd)
 
 	zrd0.a = (alpha_zrd_1)
 	zrd0.b = (alpha_zrd_2)
@@ -260,7 +196,7 @@ def main():
 	print(f"{z2.a} --> {prim.int2float(z2.a)}")
 	print(f"{z2.b} --> {prim.int2float(z2.b)}")
 	print(f"{z2.c} --> {prim.int2float(z2.c)}")
-	print(f"Reconstructed value of z: {prim.int2float(prim.int2float(rec_special(z0, z1)))}")
+	print(f"Reconstructed value of z: {prim.int2float(prim.int2float(prim.rec_special(z0, z1)))}")
 
 	
 
