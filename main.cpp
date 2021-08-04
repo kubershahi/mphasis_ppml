@@ -39,7 +39,7 @@ int N = 6; //6
 int N_test = 6;
 int d = 2; //5
 int B = 3; //3
-int NUM_EPOCHS = 5;
+int NUM_EPOCHS = 3;
 
 // ====================================
 
@@ -58,7 +58,7 @@ int main(){
   cout<<"Enter selection: ";
   cin>>selection;
 
-  MatrixXd X,Y,w;
+  MatrixXd X,Y,w,X_testdata,Y_testdata;
 
   if (selection == 1){ // loading data for MNIST dataset
 
@@ -155,8 +155,8 @@ int main(){
   else if (selection == 3){ // loading binary classfication MNIST dataset
 
   //Binary MNIST
-  :: N = 10000; // 10000
-  :: N_test = 1000; // 1000
+  :: N = 30000; // 10000
+  :: N_test = 10000; // 1000
   :: d = 784; //784
   :: B = 128; //128
 
@@ -195,6 +195,8 @@ int main(){
   X = X1;
   Y = Y1;
   w = w1;
+  X_testdata = X1_test;
+  Y_testdata = Y1_test;
 
   }
   else{
@@ -231,6 +233,21 @@ int main(){
   // MatrixXd pp_w_f = linearRegression(X,Y,w);
   // //cout << "Final weights (under Privacy Preserving) are:\n" << pw_w_f << endl << endl;
 
+  if (selection == 3){
+
+    cout<<"Run accuracy test:\n";
+    MatrixXd predictions = X_testdata * ideal_w;
+    int wrong_count = 0;
+    //cout << "dims for prediction: " << predictions.rows() <<" "<< predictions.cols()<<endl;
+    for (int i=0; i<10000; i++){
+      //cout<< predictions(i,0) <<" "<<Y_testdata(i,0)<<endl;
+      if (predictions(i,0) < 0 && Y_testdata(i,0) == 1){
+        wrong_count ++;
+      }
+    }
+    cout<<"Accuracy: "<< (10000 - wrong_count)/100.0 << "%\n";
+  }
+
   cout << "====================================="<<endl;
   cout << "PP LINEAR REGRESSION (UINT-64 Inputs):"<<endl;
   cout << "====================================="<<endl<<endl;
@@ -249,5 +266,20 @@ int main(){
   MatrixXd pp_w = uint64tofloat(pp_w_i); // descaling
 
   // cout<<"Final weights (under Privacy Preserving functionality) are:\n "<< pp_w << endl;
+
+  if (selection == 3){
+
+    cout<<"Run accuracy test:\n";
+    MatrixXd predictions = X_testdata * pp_w;
+    int wrong_count = 0;
+    //cout << "dims for prediction: " << predictions.rows() <<" "<< predictions.cols()<<endl;
+    for (int i=0; i<10000; i++){
+      //cout<< predictions(i,0) <<" "<<Y_testdata(i,0)<<endl;
+      if (predictions(i,0) < 0 && Y_testdata(i,0) == 1){
+        wrong_count ++;
+      }
+    }
+    cout<<"Accuracy: "<< (10000 - wrong_count)/100.0 << "%\n";
+  }
 
 }
