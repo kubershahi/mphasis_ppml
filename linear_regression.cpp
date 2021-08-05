@@ -17,13 +17,24 @@ using namespace Eigen;
 MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
 {
   // w -= a/|B| X^T .(X.w - Y)
-  int t = (N * NUM_EPOCHS)/B; 
-  for(int i = 0; i < t; i ++)
-  {
-    MatrixXi YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
-    MatrixXi D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
-    MatrixXi delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
-    w = w - (delta / (B*100)); // w -= a/B * delta
+  for (int e= 0; e< NUM_EPOCHS; e++)
+  { cout<< "Epoch Number: "<< e+1;
+    float epoch_loss = 0.0;
+
+    for(int i = 0; i < (N/B); i ++)
+    {
+      MatrixXi YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
+      MatrixXi D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
+
+      MatrixXi loss = D.transpose() * D;
+
+      MatrixXi delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
+      w = w - (delta / (B*100)); // w -= alpha/B * delta
+
+      epoch_loss += loss(0,0);
+    }
+  cout<<endl;
+  cout<< "Loss: "<< epoch_loss/N << endl;
   }
   return w;
 }
@@ -46,7 +57,7 @@ MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
       MatrixXd loss = D.transpose() * D;
       MatrixXd delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
       //cout<< "grad: " << endl << delta << endl;
-      w = w - (delta / (B*100)); // w -= a/B * delta
+      w = w - (delta / (B*100)); // w -= alpha/B * delta
       //cout<<"weights: "<< endl << w <<endl;
       //cout<<w<<endl;
       epoch_loss += loss(0,0);
@@ -62,51 +73,36 @@ MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
 MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w) 
 {
   // w -= a/|B| X^T .(X.w - Y)
-  //int t = (N * NUM_EPOCHS)/B; // E = 1
-  //float eta = 0.01;
-
-  //int N = 6; //6
-  //int d = 2; //5
-  //int B = 2; //3
-  //int NUM_EPOCHS = 3; 
-
   for(int e = 0; e < NUM_EPOCHS; e ++)
   { cout<< "Epoch Number: "<< e+1;
     float epoch_loss = 0.0;
 
     for(int i = 0; i < int(N/B); i ++)
     { 
+      // forward propagation
       MatrixXi64 YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
 
-      //truncation:
+      //truncation
       YY = truncate(YY, SCALING_FACTOR);
 
-      //test
-      MatrixXd YYtest = uint64tofloat(YY); // descaling
-      //cout<< "yhat: "<< endl << YYtest << endl;
-
+      // Compute difference
       MatrixXi64 D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
-
-      //test
-      MatrixXd Dtest = uint64tofloat(D);// descaling
-      //cout<< "diff: "<< endl << Dtest << endl;
       
       // Loss Computation
       MatrixXd loss = uint64tofloat(D).transpose() * uint64tofloat(D);
 
+      // Computing change in weight
       MatrixXi64 delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
       //cout<< "grad_raw: " << endl << delta << endl;
 
       //truncation:
       delta = truncate(delta, SCALING_FACTOR);
-      
-      //test
-      MatrixXd gradtest = uint64tofloat(delta);// descaling
-      //cout<< "grad: " << endl << gradtest << endl;
-      
-      delta = truncate(delta, (B*100)); // eta/B * delta, eta/B = 128 = 2^7 
-      w = w - delta; // w -= a/B * delta
+      delta = truncate(delta, (B*100)); // alpha/B * delta,
+
+      // weight update
+      w = w - delta; // w -= alpha/B * delta
       //cout<<"weights: "<< endl << uint64tofloat(w) <<endl;
+
       epoch_loss += loss(0,0);
     }
     cout<<endl;
@@ -137,6 +133,7 @@ MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
   share(w, shares); // weight shares
   MatrixXi64 w_0 = shares[0];
   MatrixXi64 w_1 = shares[1];
+
   // ===========================
   // Triplet Generation (Offline Phase)
   // ===========================
@@ -171,7 +168,7 @@ MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
   MatrixXi64 VV_0 = shares[0]; 
   MatrixXi64 VV_1 = shares[1];
 
-  //MatrixXi64 ZZ = U.transpose() * VV; // third triplet for multiplication -> change for batchwise SGD
+  //MatrixXi64 ZZ(Z') = U.transpose() * VV(V'); // third triplet for multiplication -> change for batchwise SGD
   MatrixXi64 ZZ = MatrixXi64::Zero(d,t);
   for (int z = 0; z < ZZ.cols(); z++)
   {
@@ -195,52 +192,38 @@ MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
       MatrixXi64 F_1 = w_1 - V_1.col(j);
       MatrixXi64 F = rec(F_0, F_1);
 
-      // YY = X_B_j.w
+      // YY = X_B_j * w  forward propagation
       MatrixXi64 YY_0 = mult(0, X_0.block(B * j,0,B,X.cols()), w_0, E.block(B * j,0,B,X.cols()), F, Z_0.col(j));
       MatrixXi64 YY_1 = mult(1, X_1.block(B * j,0,B,X.cols()), w_1, E.block(B * j,0,B,X.cols()), F, Z_1.col(j));
       // truncation
       YY_0 = truncate(YY_0, SCALING_FACTOR);
       YY_1 = truncate(YY_1, SCALING_FACTOR);
 
-      //test
-      MatrixXi64 YY = rec(YY_0, YY_1);
-      MatrixXd YYtest = uint64tofloat(YY); // descaling
-      //cout<< "yhat: "<< endl << YYtest << endl;
-
-      // D = X.w - Y
+      // D = X.w - Y compute difference
       MatrixXi64 D_0 = YY_0 - Y_0.block(B * j,0,B,Y.cols());
       MatrixXi64 D_1 = YY_1 - Y_1.block(B * j,0,B,Y.cols());
 
       // Loss Computation (for testing only)
       MatrixXi64 D = rec(D_0, D_1);
       MatrixXd loss = uint64tofloat(D).transpose() * uint64tofloat(D);
-      
-      //test
-      MatrixXd Dtest = uint64tofloat(D);// descaling
-      //cout<< "diff: "<< endl << Dtest << endl;
 
       MatrixXi64 FF_0 = D_0 - VV_0.col(j);
       MatrixXi64 FF_1 = D_1 - VV_1.col(j);
       MatrixXi64 FF = rec(FF_0, FF_1);
 
-      // delta = X^T(X.w - Y)
+      // delta = X^T(X.w - Y)  computing change in weight
       MatrixXi64 delta_0 = mult(0, X_0.transpose().block(0,B * j,X.cols(),B), D_0, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_0.col(j));
       MatrixXi64 delta_1 = mult(1, X_1.transpose().block(0,B * j,X.cols(),B), D_1, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_1.col(j));
+      
       // truncation
       delta_0 = truncate(delta_0, SCALING_FACTOR);
       delta_1 = truncate(delta_1, SCALING_FACTOR);
-
-      //test
-      MatrixXi64 delta = rec(delta_0, delta_1);
-      MatrixXd gradtest = uint64tofloat(delta);// descaling
-      //cout<< "grad: " << endl << gradtest << endl;
       
-
       // gradient update
-      delta_0 = truncate(delta_0, (B*100)); // eta/B * delta, eta/B = 128 = 2^7 
-      delta_1 = truncate(delta_1, (B*100)); // eta/B * delta, eta/B = 128 = 2^7 
-      w_0 = w_0 - delta_0; // alpha/b = 2^-7 = 128; used in paper
-      w_1 = w_1 - delta_1; // alpha/b = 2^-7 = 128; used in paper
+      delta_0 = truncate(delta_0, (B*100)); // alpha/B * delta, 
+      delta_1 = truncate(delta_1, (B*100)); // alpha/B * delta, 
+      w_0 = w_0 - delta_0; // w = w - alpha/B * delta
+      w_1 = w_1 - delta_1; // w = w - alpha/B * delta
 
       //test
       MatrixXi64 w = rec(w_0, w_1);
@@ -272,6 +255,7 @@ MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
   share(w, shares); // weight shares
   MatrixXd w_0 = shares[0];
   MatrixXd w_1 = shares[1];
+
   // ===========================
   // Triplet Generation (Offline Phase)
   // ===========================
@@ -306,7 +290,7 @@ MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
   MatrixXd VV_0 = shares[0]; 
   MatrixXd VV_1 = shares[1];
 
-  //MatrixXd ZZ = U.transpose() * VV; // third triplet for multiplication -> change for batchwise SGD
+  //MatrixXd ZZ(Z') = U.transpose() * VV(V'); // third triplet for multiplication -> change for batchwise SGD
   MatrixXd ZZ = MatrixXd::Zero(d,t);
   for (int z = 0; z < ZZ.cols(); z++)
   {
@@ -329,7 +313,7 @@ MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
       MatrixXd F_1 = w_1 - V_1.col(j);
       MatrixXd F = rec(F_0, F_1);
 
-      // YY = X_B_j.w
+      // YY = X_B_j.w forward propagation
       MatrixXd YY_0 = mult(0, X_0.block(B * j,0,B,X.cols()), w_0, E.block(B * j,0,B,X.cols()), F, Z_0.col(j));
       MatrixXd YY_1 = mult(1, X_1.block(B * j,0,B,X.cols()), w_1, E.block(B * j,0,B,X.cols()), F, Z_1.col(j));
 
@@ -345,13 +329,13 @@ MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
       MatrixXd FF_1 = D_1 - VV_1.col(j);
       MatrixXd FF = rec(FF_0, FF_1);
 
-      // delta = X^T(X.w - Y)
+      // delta = X^T(X.w - Y) computing change in weight
       MatrixXd delta_0 = mult(0, X_0.transpose().block(0,B * j,X.cols(),B), D_0, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_0.col(j));
       MatrixXd delta_1 = mult(1, X_1.transpose().block(0,B * j,X.cols(),B), D_1, E.transpose().block(0,B * j,X.cols(),B), FF, ZZ_1.col(j));
 
-      // delta = X^T(X.w - Y)
-      w_0 = w_0 - (delta_0 / (B*100)); // alpha/b = 2^-7 = 128; used in paper
-      w_1 = w_1 - (delta_1 / (B*100)); // alpha/b = 2^-7 = 128; used in paper
+      // delta = X^T(X.w - Y) updating weight
+      w_0 = w_0 - (delta_0 / (B*100)); // w = w - alpha/B * delta
+      w_1 = w_1 - (delta_1 / (B*100)); // w = w - alpha/B * delta
 
       //cout<< rec(w_0, w_1) <<endl;
       epoch_loss += loss(0,0);

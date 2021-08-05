@@ -1,10 +1,8 @@
-#include "utils.hpp"
-#include "read_data.hpp"
 #include "defines.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 #include <Eigen/Dense>
-
 
 using namespace std;
 using namespace Eigen;
@@ -142,9 +140,6 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
 // For integer inputs
 MatrixXi mult(int i, MatrixXi A, MatrixXi B, MatrixXi E, MatrixXi F, MatrixXi Z)
 { 
-  //MatrixXi pp = E*F + U*F + E*V + Z;
-  //MatrixXi pp = -E*F + X*F + E*w + Z;
-  //MatrixXi pp = E*F + X*F + E*w + Z; //--> doesn't work (SecureML)
   MatrixXi product = MatrixXi::Random(Z.rows(),Z.cols());
   if (i == 1) product = -(E * F) + (A * F) + (E * B) + Z;
   else if (i == 0) product = (A * F) + (E * B) + Z;
@@ -155,9 +150,6 @@ MatrixXi mult(int i, MatrixXi A, MatrixXi B, MatrixXi E, MatrixXi F, MatrixXi Z)
 // For 64-integer inputs
 MatrixXi64 mult(int i, MatrixXi64 A, MatrixXi64 B, MatrixXi64 E, MatrixXi64 F, MatrixXi64 Z)
 { 
-  //MatrixXi64 pp = E*F + U*F + E*V + Z;
-  //MatrixXi64 pp = -E*F + X*F + E*w + Z;
-  //MatrixXi64 pp = E*F + X*F + E*w + Z; //--> doesn't work (SecureML)
 	MatrixXi64 product = MatrixXi64::Random(Z.rows(),Z.cols());
 	if (i == 1) product = -(E * F) + (A * F) + (E * B) + Z;
 	else if (i == 0) product = (A * F) + (E * B) + Z;
@@ -168,9 +160,6 @@ MatrixXi64 mult(int i, MatrixXi64 A, MatrixXi64 B, MatrixXi64 E, MatrixXi64 F, M
 // For floating point numbersinputs
 MatrixXd mult(int i, MatrixXd A, MatrixXd B, MatrixXd E, MatrixXd F, MatrixXd Z)
 { 
-  //MatrixXf pp = E*F + U*F + E*V + Z;
-  //MatrixXf pp = -E*F + X*F + E*w + Z;
-  //MatrixXf pp = E*F + X*F + E*w + Z; //--> doesn't work (SecureML)
   MatrixXd product = MatrixXd::Random(Z.rows(),Z.cols());
   if (i == 1) product = -(E * F) + (A * F) + (E * B) + Z;
   else if (i == 0) product = (A * F) + (E * B) + Z;
@@ -194,3 +183,33 @@ MatrixXd predict(MatrixXd X, MatrixXd Y, MatrixXd w)
 //function that just predicts the output
 MatrixXd predict(MatrixXd X, MatrixXd w)
 { return X * w;}
+
+float TestAcc(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
+{
+  MatrixXd pred = X_test * w;
+  int count = 0;
+
+  for (int i = 0; i < N_test; i ++)
+  {
+    if (s==1){
+      if ( Y_test(i,0) - 0.5 < pred(i,0) && pred(i,0) <= Y_test(i,0) + 0.5)
+      {
+        count += 1;
+      }
+    }
+    else if (s==2)
+    {
+      if ( Y_test(i,0) - 9000  <= pred(i,0) && pred(i,0) <= Y_test(i,0) + 9000)
+      {
+        count += 1;
+      }
+    }
+    else if (s==3){
+      if ((pred(i,0) < 0.5 && Y_test(i,0)==0) || (pred(i,0) >= 0.5 && Y_test(i,0) == 1)){
+        count += 1;
+      }
+    }
+  }
+  // cout << "Count: " << count << endl;
+  return ((float) count/N_test * 100.0);
+}

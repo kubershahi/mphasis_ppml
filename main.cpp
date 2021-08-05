@@ -23,12 +23,11 @@ Dimensions:
 - Y: (n,1)
 - U: (n,d)
 - V: (d,t)
-- VV: (B,t)
+- VV (V'): (B,t)
 - Z: (B,t)
-- ZZ: (d,t)
+- ZZ(Z'): (d,t)
 ====================================
 */
-
 
 // ====================================
 // Global Declarations: 
@@ -61,12 +60,12 @@ int main(){
   MatrixXd X,Y,w,X_testdata,Y_testdata;
 
   if (selection == 1){ // loading data for MNIST dataset
-
-  //MNIST
-  :: N = 10000; // 10000
-  :: N_test = 1000; // 1000
+  
+  :: N = 60000; // 10000
+  :: N_test = 10000; // 1000
   :: d = 784; //784
   :: B = 128; //128
+  :: NUM_EPOCHS = 4;
 
   cout<<"Reading Data:"<<endl;
   
@@ -81,7 +80,7 @@ int main(){
   for (int i = 0; i < N; i++)
   {
     X1.row(i) = VectorXd::Map(&X_train[i][0], d)/256.0;
-    Y1.row(i) = VectorXd::Map(&Y_train[i],1)/10.0;
+    Y1.row(i) = VectorXd::Map(&Y_train[i],1);
   }
 
   vector<vector<double> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
@@ -95,7 +94,7 @@ int main(){
   for (int i = 0; i < N_test; i++)
   {
     X1_test.row(i) = VectorXd::Map(&X_test[i][0], d)/256.0;
-    Y1_test.row(i) = VectorXd::Map(&Y_test[i],1)/10.0;
+    Y1_test.row(i) = VectorXd::Map(&Y_test[i],1);
   }
 
   MatrixXd w1 = MatrixXd::Random(d,1);
@@ -104,14 +103,17 @@ int main(){
   Y = Y1;
   w = w1;
 
-  }
-  else if (selection == 2){ // loading data for MNIST dataset
+  X_testdata = X1_test;
+  Y_testdata = Y1_test;
 
-  //Medical Insurance
+  }
+  else if (selection == 2){ // loading data for Medical dataset
+
   :: N = 1070; // 1070
   :: N_test = 268; // 268
   :: d = 5; // 5
-  :: B = 2; //2
+  :: B = 1; //2
+  :: NUM_EPOCHS = 100; //100
 
   cout<<"Reading Data:"<<endl;
   
@@ -148,17 +150,17 @@ int main(){
   X = X3;
   Y = Y3;
   w = w3;
+  X_testdata = X3_test;
+  Y_testdata = Y3_test;
 
-  // cout<<X<<endl;
   }
+  else if (selection == 3){ // loading Binary MNIST dataset
 
-  else if (selection == 3){ // loading binary classfication MNIST dataset
-
-  //Binary MNIST
-  :: N = 30000; // 10000
+  :: N = 60000; // 10000
   :: N_test = 10000; // 1000
   :: d = 784; //784
   :: B = 128; //128
+  :: NUM_EPOCHS = 4;
 
   cout<<"Reading Data:"<<endl;
   
@@ -199,11 +201,8 @@ int main(){
   Y_testdata = Y1_test;
 
   }
-  else{
+  else{ // Sanity Check Data:
 
-  //==========================================
-  // Sanity Check data:
-  //==========================================
   MatrixXd X2(6,2);
   X2 << 4,1,-2.4,8,1,0.11,3,2.3,1,4,6.6,7.32;
   MatrixXd Y2(6,1);
@@ -214,6 +213,7 @@ int main(){
   X = X2;
   Y = Y2;
   w = w2;
+
   }
 
 
@@ -223,63 +223,33 @@ int main(){
 
   //cout<<"Initial weights: "<< endl << w <<endl<<endl;
 
+  cout << endl;
   cout << "================================================"<<endl;
   cout << "NON-PP LINEAR REGRESSION (Floating Point Inputs):"<<endl;
   cout << "================================================"<<endl<<endl;
 
   MatrixXd ideal_w = idealLinearRegression(X,Y,w);
   // cout << "Final weights (under NON-PP Functionality) are:\n" << ideal_w << endl;
-  cout<<endl;
-  // MatrixXd pp_w_f = linearRegression(X,Y,w);
-  // //cout << "Final weights (under Privacy Preserving) are:\n" << pw_w_f << endl << endl;
-
-  if (selection == 3){
-
-    cout<<"Run accuracy test:\n";
-    MatrixXd predictions = X_testdata * ideal_w;
-    int wrong_count = 0;
-    //cout << "dims for prediction: " << predictions.rows() <<" "<< predictions.cols()<<endl;
-    for (int i=0; i<10000; i++){
-      //cout<< predictions(i,0) <<" "<<Y_testdata(i,0)<<endl;
-      if (predictions(i,0) < 0 && Y_testdata(i,0) == 1){
-        wrong_count ++;
-      }
-    }
-    cout<<"Accuracy: "<< (10000 - wrong_count)/100.0 << "%\n";
-  }
-
+  
+  cout << endl;
+  cout << "Testing Accuracy: " << TestAcc(selection, ideal_w, X_testdata, Y_testdata) << " %" << endl;
+  
+  cout << endl;
   cout << "====================================="<<endl;
   cout << "PP LINEAR REGRESSION (UINT-64 Inputs):"<<endl;
   cout << "====================================="<<endl<<endl;
 
+  // conerting doubles to 64-bit integers
   MatrixXi64 X_ = floattouint64(X); // double to uint_64
   MatrixXi64 Y_ = floattouint64(Y); // double to uint_64
   MatrixXi64 w_ = floattouint64(w); // double to uint_64
-
-  // MatrixXi64 ideal_w_i = idealLinearRegression(X_,Y_,w_);
-  // MatrixXd ideal_w_f = uint64tofloat(ideal_w_i); // descaling
-
-  //cout<<"Final weights (under NON-PP INT Functionality)  are:\n "<< ideal_w_f << endl;
-  cout<<endl;
 
   MatrixXi64 pp_w_i = linearRegression(X_,Y_,w_);
   MatrixXd pp_w = uint64tofloat(pp_w_i); // descaling
 
   // cout<<"Final weights (under Privacy Preserving functionality) are:\n "<< pp_w << endl;
 
-  if (selection == 3){
-
-    cout<<"Run accuracy test:\n";
-    MatrixXd predictions = X_testdata * pp_w;
-    int wrong_count = 0;
-    //cout << "dims for prediction: " << predictions.rows() <<" "<< predictions.cols()<<endl;
-    for (int i=0; i<10000; i++){
-      //cout<< predictions(i,0) <<" "<<Y_testdata(i,0)<<endl;
-      if (predictions(i,0) < 0 && Y_testdata(i,0) == 1){
-        wrong_count ++;
-      }
-    }
-    cout<<"Accuracy: "<< (10000 - wrong_count)/100.0 << "%\n";
-  }
+  cout << endl;
+  cout << "Testing Accuracy: " << TestAcc(selection, pp_w, X_testdata, Y_testdata) << " %" << endl;
 
 }

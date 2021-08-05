@@ -9,10 +9,8 @@
 #include <Eigen/Dense>
 
 /* 
-
 Input: dataset file
 Output: returns dataset, data in two-dimensional vector.
-
 */
 
 using namespace std;
