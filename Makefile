@@ -13,6 +13,9 @@ all:  read_data.o main.o utils.o linear_regression.o
 linear_regression.o:	linear_regression.cpp linear_regression.hpp
 	$(CC) $(CFLAGS) -c linear_regression.cpp
 
+logistic_regression.o:	logistic_regression.cpp logistic_regression.hpp
+	$(CC) $(CFLAGS) -c logistic_regression.cpp
+
 utils.o:	utils.cpp utils.hpp
 	$(CC) $(CFLAGS) -c utils.cpp
 

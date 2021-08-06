@@ -11,32 +11,6 @@ using namespace Eigen;
 // NON-PRIVACY-PRESERVING LINEAR REGRESSION (IDEAL)
 // ==================================================
 
-// Non-PP Linear Regression for integer inputs
-MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w)
-{
-  // w -= a/|B| X^T .(X.w - Y)
-  for (int e= 0; e< NUM_EPOCHS; e++)
-  { cout<< "Epoch Number: "<< e+1;
-    float epoch_loss = 0.0;
-
-    for(int i = 0; i < (N/B); i ++)
-    {
-      MatrixXi YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
-      MatrixXi D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
-
-      MatrixXi loss = D.transpose() * D;
-
-      MatrixXi delta = X.transpose().block(0,B * i,X.cols(),B) * D; // delta = X^T_B_i(X.w - Y)
-      w = w - (delta / (B*100)); // w -= alpha/B * delta
-
-      epoch_loss += loss(0,0);
-    }
-  cout<<endl;
-  cout<< "Loss: "<< epoch_loss/N << endl;
-  }
-  return w;
-}
-
 // Non-PP Linear Regression for floating point inputs
 MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
 {

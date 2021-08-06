@@ -1,5 +1,5 @@
-#ifndef SECML_LINEAR_REGRESSION_HPP
-#define SECML_LINEAR_REGRESSION_HPP
+#ifndef SECML_LOGISTIC_REGRESSION_HPP
+#define SECML_LOGISTIC_REGRESSION_HPP
 
 #include "defines.hpp"
 #include "utils.hpp"
@@ -10,11 +10,10 @@
 using namespace std;
 using namespace Eigen;
 
-MatrixXi idealLinearRegression(MatrixXi X, MatrixXi Y, MatrixXi w);
-MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w);
+MatrixXd idealLogisticRegression(MatrixXd X, MatrixXd Y, MatrixXd w);
 MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w);
 
-MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w);
 MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w); 
+MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w);
 
 #endif // SECML_UTIL_HPP
