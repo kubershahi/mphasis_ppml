@@ -80,7 +80,7 @@ int main(){
   for (int i = 0; i < N; i++)
   {
     X1.row(i) = VectorXd::Map(&X_train[i][0], d)/256.0;
-    Y1.row(i) = VectorXd::Map(&Y_train[i],1);
+    Y1.row(i) = VectorXd::Map(&Y_train[i],1)/10.0;
   }
 
   vector<vector<double> > X_test;    // dim: 10000 x 784, 10000 testing samples with 784 features
@@ -94,7 +94,7 @@ int main(){
   for (int i = 0; i < N_test; i++)
   {
     X1_test.row(i) = VectorXd::Map(&X_test[i][0], d)/256.0;
-    Y1_test.row(i) = VectorXd::Map(&Y_test[i],1);
+    Y1_test.row(i) = VectorXd::Map(&Y_test[i],1)/10.0;
   }
 
   MatrixXd w1 = MatrixXd::Random(d,1);
@@ -113,7 +113,7 @@ int main(){
   :: N_test = 268; // 268
   :: d = 5; // 5
   :: B = 1; //2
-  :: NUM_EPOCHS = 100; //100
+  :: NUM_EPOCHS = 90; //100
 
   cout<<"Reading Data:"<<endl;
   
@@ -128,7 +128,7 @@ int main(){
   for (int i = 0; i < N; i++)
   {
     X3.row(i) = VectorXd::Map(&X_train[i][0], d)/100.0;
-    Y3.row(i) = VectorXd::Map(&Y_train[i],1);
+    Y3.row(i) = VectorXd::Map(&Y_train[i],1)/10000.0;
   }
 
   vector<vector<double> > X_test;    // dim: 268 x 5, 268 testing samples with 5 features
@@ -142,7 +142,7 @@ int main(){
   for (int i = 0; i < N_test; i++)
   {
     X3_test.row(i) = VectorXd::Map(&X_test[i][0], d)/100.0;
-    Y3_test.row(i) = VectorXd::Map(&Y_test[i],1);
+    Y3_test.row(i) = VectorXd::Map(&Y_test[i],1)/10000.0;
   }
 
   MatrixXd w3 = MatrixXd::Random(d,1);
@@ -232,7 +232,7 @@ int main(){
   // cout << "Final weights (under NON-PP Functionality) are:\n" << ideal_w << endl;
   
   cout << endl;
-  cout << "Testing Accuracy: " << TestAcc(selection, ideal_w, X_testdata, Y_testdata) << " %" << endl;
+  cout << "Testing Regression Model: " << TestRegressionModel(selection, ideal_w, X_testdata, Y_testdata) << endl;
   
   cout << endl;
   cout << "====================================="<<endl;
@@ -250,6 +250,6 @@ int main(){
   // cout<<"Final weights (under Privacy Preserving functionality) are:\n "<< pp_w << endl;
 
   cout << endl;
-  cout << "Testing Accuracy: " << TestAcc(selection, pp_w, X_testdata, Y_testdata) << " %" << endl;
+  cout << "Testing Regression Model: " << TestRegressionModel(selection, pp_w, X_testdata, Y_testdata) << endl;
 
 }

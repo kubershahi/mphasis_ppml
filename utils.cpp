@@ -2,6 +2,7 @@
 #include "utils.hpp"
 
 #include <iostream>
+#include <string>
 #include <Eigen/Dense>
 
 using namespace std;
@@ -184,32 +185,35 @@ MatrixXd predict(MatrixXd X, MatrixXd Y, MatrixXd w)
 MatrixXd predict(MatrixXd X, MatrixXd w)
 { return X * w;}
 
-float TestAcc(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
+string TestRegressionModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
 {
-  MatrixXd pred = X_test * w;
-  int count = 0;
 
-  for (int i = 0; i < N_test; i ++)
-  {
-    if (s==1){
-      if ( Y_test(i,0) - 0.5 < pred(i,0) && pred(i,0) <= Y_test(i,0) + 0.5)
-      {
-        count += 1;
-      }
-    }
-    else if (s==2)
-    {
-      if ( Y_test(i,0) - 9000  <= pred(i,0) && pred(i,0) <= Y_test(i,0) + 9000)
-      {
-        count += 1;
-      }
-    }
-    else if (s==3){
-      if ((pred(i,0) < 0.5 && Y_test(i,0)==0) || (pred(i,0) >= 0.5 && Y_test(i,0) == 1)){
-        count += 1;
-      }
-    }
+  int count = 0;
+  string res;
+
+  // making prediction
+  MatrixXd pred = X_test * w;
+  // cout << pred << endl;
+  
+  if (s==1 || s==2){
+
+    MatrixXd diff = Y_test - pred;
+    MatrixXd MSE = diff.transpose() * diff;
+
+    res = "Loss " + to_string(MSE(0,0)/N_test);
   }
-  // cout << "Count: " << count << endl;
-  return ((float) count/N_test * 100.0);
+  else if (s==3){
+    for (int i=0; i < N_test; i++)
+    {
+      if ((pred(i,0) < 0.5 && Y_test(i,0)==0) || (pred(i,0) >= 0.5 && Y_test(i,0) == 1))
+      {
+        count += 1;
+      }
+    }
+    cout << "Count: " << count << endl;
+    float accuracy = ((float) count/N_test * 100.0);
+    res = to_string(accuracy) + " %";
+  }
+
+  return res;
 }
