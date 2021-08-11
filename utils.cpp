@@ -184,7 +184,7 @@ MatrixXd predict(MatrixXd X, MatrixXd Y, MatrixXd w)
 MatrixXd predict(MatrixXd X, MatrixXd w)
 { return X * w;}
 
-string TestRegressionModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
+string TestLinearModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
 {
 
   int count = 0;
@@ -213,6 +213,29 @@ string TestRegressionModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
     float accuracy = ((float) count/N_test * 100.0);
     res = to_string(accuracy) + " %";
   }
+
+  return res;
+}
+
+string TestLogisticModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
+{
+  int count = 0;
+  string res;
+
+  // making prediction
+  MatrixXd pred = X_test * w;
+  // cout << pred << endl;
+
+  for (int i=0; i < N_test; i++)
+  {
+    if ((pred(i,0) < 0.5 && Y_test(i,0)==0) || (pred(i,0) >= 0.5 && Y_test(i,0) == 1))
+    {
+      count += 1;
+    }
+  }
+  cout << "Count: " << count << endl;
+  float accuracy = ((float) count/N_test * 100.0);
+  res = to_string(accuracy) + " %";
 
   return res;
 }

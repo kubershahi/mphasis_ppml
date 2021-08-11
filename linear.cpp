@@ -232,7 +232,7 @@ int main(){
   // cout << "Final weights (under NON-PP Functionality) are:\n" << ideal_w << endl;
   
   cout << endl;
-  cout << "Testing Regression Model: " << TestRegressionModel(selection, ideal_w, X_testdata, Y_testdata) << endl;
+  cout << "Testing Regression Model: " << TestLinearModel(selection, ideal_w, X_testdata, Y_testdata) << endl;
   
   cout << endl;
   cout << "====================================="<<endl;
@@ -250,6 +250,6 @@ int main(){
   // cout<<"Final weights (under Privacy Preserving functionality) are:\n "<< pp_w << endl;
 
   cout << endl;
-  cout << "Testing Regression Model: " << TestRegressionModel(selection, pp_w, X_testdata, Y_testdata) << endl;
+  cout << "Testing Regression Model: " << TestLinearModel(selection, pp_w, X_testdata, Y_testdata) << endl;
 
 }
