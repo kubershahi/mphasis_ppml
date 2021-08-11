@@ -27,6 +27,8 @@ MatrixXd mult(int i, MatrixXd A, MatrixXd B, MatrixXd E, MatrixXd F, MatrixXd Z)
 MatrixXd predict(MatrixXd X, MatrixXd Y, MatrixXd w);
 MatrixXd predict(MatrixXd X, MatrixXd w);
 string TestLinearModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test);
+
+double sigmoid(double x);
 string TestLogisticModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test);
 
 #endif // SECML_UTIL_HPP

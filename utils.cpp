@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <cmath>
 #include <Eigen/Dense>
 
 using namespace std;
@@ -215,6 +216,15 @@ string TestLinearModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
   }
 
   return res;
+}
+
+// =========================================
+// Helper Functions for Logistic Regression: 
+// =========================================
+
+double sigmoid(double x)
+{
+  return (1/(1 + exp(-x)));
 }
 
 string TestLogisticModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)

@@ -1,4 +1,4 @@
-#include "linear_regression.hpp"
+#include "logistic_regression.hpp"
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -8,11 +8,11 @@ using namespace std;
 using namespace Eigen;
 
 // ================================================== 
-// NON-PRIVACY-PRESERVING LINEAR REGRESSION (IDEAL)
+// NON-PRIVACY-PRESERVING LOGISTIC REGRESSION (IDEAL)
 // ==================================================
 
-// Non-PP Linear Regression for floating point inputs
-MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
+// Non-PP Logistic Regression for floating point inputs
+MatrixXd idealLogisticRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
 {
   //cout<<"Initial weights: "<< endl << w <<endl;
   for(int e = 0; e < NUM_EPOCHS; e ++)
@@ -21,8 +21,10 @@ MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
 
     for(int i = 0; i < int(N/B); i ++)
     { 
-      MatrixXd YY = X.block(B * i,0,B,X.cols()) * w; // YY = X_B_i.w
-      //cout<< "yhat: "<< endl << YY << endl;
+      MatrixXd YY = X.block(B * i,0,B,X.cols()) * w;  // YY = X_B_i.w
+      YY = YY.unaryExpr(&sigmoid);                    // applying sigmoid activation function
+      // cout<< "yhat: "<< endl << YY << endl;
+
       MatrixXd D = YY - Y.block(B * i,0,B,Y.cols()); // D = X_B_i.w - Y_B_i
       //cout<< "diff: "<< endl << D << endl;
       // Loss Computation
@@ -41,8 +43,8 @@ MatrixXd idealLinearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
   return w;
 }
 
-// Non-PP Linear Regression for 64-Integer inputs
-MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w) 
+// Non-PP Logistic Regression for 64-Integer inputs
+MatrixXi64 idealLogisticRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w) 
 {
   // w -= a/|B| X^T .(X.w - Y)
   for(int e = 0; e < NUM_EPOCHS; e ++)
@@ -85,11 +87,11 @@ MatrixXi64 idealLinearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
 }
 
 // ==================================== 
-// PRIVACY-PRESERVING LINEAR REGRESSION
+// PRIVACY-PRESERVING LOGISTIC REGRESSION
 // ==================================== 
 
-// Linear Regression for 64-Integer Input 
-MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
+// Logistic Regression for 64-Integer Input 
+MatrixXi64 logisticRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
 { 
   // ===========================
   // Additive Secret Sharing
@@ -210,8 +212,8 @@ MatrixXi64 linearRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w)
   return rec(w_0, w_1);
 }
 
-// Linear Regression for floating point input
-MatrixXd linearRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
+// Logistic Regression for floating point input
+MatrixXd logisticRegression(MatrixXd X, MatrixXd Y, MatrixXd w)
 { 
   // ===========================
   // Additive Secret Sharing
