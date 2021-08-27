@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<time.h>
-#define SCALING_FACTOR 65536 // Precision of 13 bits
+#define SCALING_FACTOR 65536 // Precision of 16 bits
 using namespace std;
 
 // Given U, find f(U) privately, where f = Double ReLU
@@ -90,12 +90,7 @@ double rec(double A, double B)
 	return A + B;
 }
 
-// ===========================
-
-
-int main(){
-	srand(time(0));
-
+void test(double U, double V, double Z){
 	//cout<<"Test Float: "<<3.445<<" "<<-0.852<<endl;
 	//cout<<"Test Float Mapped to UINT: "<<floattouint64(3.445)<<" "<<floattouint64(-0.852)<<endl;
 	//cout<<"Test UNIT Mapped to Float: "<<uint64tofloat(floattouint64(3.445))<<" "<<uint64tofloat(floattouint64(-0.852))<<endl;
@@ -114,12 +109,6 @@ int main(){
 	
 	//cout<< num1 <<" = "<< num1_shares[0] <<" + "<< num1_shares[1] << endl;
 	//cout<< num2 <<" = "<< num2_shares[0] <<" + "<< num2_shares[1] << endl;
-
-	//====
-	double U = 2.21;
-	double V = 1.99;
-	double Z = U * V;
-	//===
 
 	double Z_shares[2];
 	share(Z, Z_shares);
@@ -177,6 +166,22 @@ int main(){
 	cout<< "uint64 mapped: "<< uint64tofloat(truncate(num1int * num2int, SCALING_FACTOR)) <<" = "<< uint64tofloat(p_0int)<<" + "<< uint64tofloat(p_1int) <<" = "<< uint64tofloat(p_0int + p_1int) << endl;
 	cout<<"========="<<endl;
 
+}
+
+// ===========================
+
+
+int main(){
+	srand(time(0));
+	
+	
+	//====
+	double U = 2.21;
+	double V = 1.99;
+	double Z = U * V;
+	//===
+	test(U,V,Z);
+
 	double fout;
 
 	double theta = 0.62;
@@ -186,31 +191,69 @@ int main(){
 	double gamma_shares[2];
 	share(delta, delta_shares);
 	share(gamma, gamma_shares);
-	cout<< "delta: "<< delta <<" = "<< delta_shares[0] <<" + "<< delta_shares[1] << endl;
+	//cout<< "delta: "<< delta <<" = "<< delta_shares[0] <<" + "<< delta_shares[1] << endl;
 
 	double r = 0.4131; // to be tested
 	double r_shares[2]; // change this
 	share(r, r_shares);
-	cout<< "r: "<< r <<" = "<< r_shares[0] <<" + "<< r_shares[1] << endl;
+	//cout<< "r: "<< r <<" = "<< r_shares[0] <<" + "<< r_shares[1] << endl;
 
-	E = r - U;
-	F = delta - V;
+	double E = r - U;
+	double F = delta - V;
+	double Z_shares[2];
+	share(Z, Z_shares);
 	// Party 0
 	double rdelta_0 = mult(0, r_shares[0], delta_shares[0], E, F, Z_shares[0]);
 	// Party 1
 	double rdelta_1 = mult(1, r_shares[1], delta_shares[1], E, F, Z_shares[1]);
 
 	double rdelta = rec(rdelta_0, rdelta_1);
-	cout<< "rdelta: "<< rdelta <<" = "<< rdelta_0 <<" + "<< rdelta_1 << endl;
-	cout<<"theta: "<<theta<<", delta: "<<delta<<", rdelta: "<< rdelta <<endl;
-	if (rdelta < 0) fout = 0;
+	//cout<< "rdelta: "<< rdelta <<" = "<< rdelta_0 <<" + "<< rdelta_1 << endl;
+	cout<<"theta (floating): "<<theta<<", delta: "<<delta<<", rdelta: "<< rdelta <<endl;
 
+	// ====================
+	uint64_t thetaint = floattouint64(theta);
+	uint64_t deltaint = floattouint64(delta);
+	uint64_t gammaint = floattouint64(gamma);
+	uint64_t deltaint_shares[2];
+	deltaint_shares[0] = floattouint64(delta_shares[0]);
+	deltaint_shares[1] = floattouint64(delta_shares[1]);
+	uint64_t gammaint_shares[2];
+	gammaint_shares[0] = floattouint64(gamma_shares[0]);
+	gammaint_shares[1] = floattouint64(gamma_shares[1]);
+
+	uint64_t rint = floattouint64(r);
+	uint64_t rint_shares[2];
+	rint_shares[0] = floattouint64(r_shares[0]);
+	rint_shares[1] = floattouint64(r_shares[1]);
+
+	uint64_t Zint_shares[2];
+	//share(Zint, Zint_shares);
+	Zint_shares[0] = floattouint64(Z_shares[0]);
+	Zint_shares[1] = floattouint64(Z_shares[1]);
+	//uint64_t Eint = num1int - Uint;
+	//uint64_t Fint = num2int - Vint;
+	uint64_t Eint = floattouint64(E);
+	uint64_t Fint = floattouint64(F);
+	// Party 0
+	uint64_t rdeltaint_0 = mult(0, rint_shares[0], deltaint_shares[0], Eint, Fint, Zint_shares[0]);
+	// Party 1
+	uint64_t rdeltaint_1 = mult(1, rint_shares[1], deltaint_shares[1], Eint, Fint, Zint_shares[1]);
+	
+	rdeltaint_0 = truncate(rdeltaint_0, SCALING_FACTOR);
+	rdeltaint_1 = truncate(rdeltaint_1, SCALING_FACTOR);
+
+	cout<< "theta (uint): "<< uint64tofloat(thetaint) <<", delta: "<<uint64tofloat(deltaint)<<", rdelta: "<< uint64tofloat(rdeltaint_0 + rdeltaint_1) <<endl;
+	cout<<"========="<<endl;
+	
+	
+	if (rdelta < 0) fout = 0;
 	else
 	{
-		double s = 3.0; // to be tested
-		double s_shares[2]; // change this
+		double s = 3.0; 
+		double s_shares[2];
 		share(s, s_shares);
-		cout<< "s: "<< s <<" = "<< s_shares[0] <<" + "<< s_shares[1] << endl;
+		//cout<< "s: "<< s <<" = "<< s_shares[0] <<" + "<< s_shares[1] << endl;
 
 		E = s - U;
 		F = gamma - V;
@@ -220,8 +263,8 @@ int main(){
 		double sgamma_1 = mult(1, s_shares[1], gamma_shares[1], E, F, Z_shares[1]);
 		
 		double sgamma = rec(sgamma_0, sgamma_1);
-		cout<< "sgamma: "<< sgamma <<" = "<< sgamma_0 <<" + "<< sgamma_1 << endl;
-		cout<<"theta: "<<theta<<", gamma: "<<gamma<<", sgamma: "<< sgamma <<endl;
+		//cout<< "sgamma: "<< sgamma <<" = "<< sgamma_0 <<" + "<< sgamma_1 << endl;
+		//cout<<"theta: "<<theta<<", gamma: "<<gamma<<", sgamma: "<< sgamma <<endl;
 		if (sgamma < 0) fout = theta + 0.5;
 		else fout = 1;
 
