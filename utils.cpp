@@ -84,7 +84,7 @@ MatrixXi64 floattouint64(MatrixXd A)
   return res;
 }
 
-//function that coverts uint64 matrix to double matrix
+//function that converts uint64 matrix to double matrix
 MatrixXd uint64tofloat(MatrixXi64 A)
 {
   MatrixXd res(A.rows(),A.cols());
@@ -103,7 +103,6 @@ MatrixXd uint64tofloat(MatrixXi64 A)
         res(i,j) = ((double) a)/SCALING_FACTOR;
         //cout<< res(i,j) << " is positive"<<endl;
       }
-        
     }
   } 
   return res;
