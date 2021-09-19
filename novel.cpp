@@ -1,13 +1,15 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include<time.h>
+#include <time.h>
+#include <cmath>
+
 #define SCALING_FACTOR 65536 // Precision of 16 bits
 using namespace std;
 
 // Given U, find f(U) privately, where f = Double ReLU
 
-// f(z) = 0, if z < -1/2
+// f(z) = 0, if z < -1/2 
 // f(z) = z + 1/2, if -1/2 < z < 1/2
 // f(z) = 1, if z > 1/2
 
@@ -15,6 +17,7 @@ using namespace std;
 // ===========================
 
 // function that converts float to int
+
 uint64_t floattouint64(double d)
 {	uint64_t res;
 	if (d > 0) res = (uint64_t)(d * SCALING_FACTOR);
