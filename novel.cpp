@@ -1,21 +1,14 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-<<<<<<< Updated upstream
-#include <time.h>
-#include <cmath>
-
-#define SCALING_FACTOR 65536 // Precision of 16 bits
-=======
 #include<time.h>
 #include<math.h>
 #define SCALING_FACTOR 65536// Precision of 16 bits 8192
->>>>>>> Stashed changes
 using namespace std;
 
 // Given U, find f(U) privately, where f = Double ReLU
 
-// f(z) = 0, if z < -1/2 
+// f(z) = 0, if z < -1/2
 // f(z) = z + 1/2, if -1/2 < z < 1/2
 // f(z) = 1, if z > 1/2
 
@@ -23,10 +16,6 @@ using namespace std;
 // ===========================
 
 // function that converts float to int
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 uint64_t floattouint64(double d)
 {	uint64_t res;
 	if (d > 0) res = (uint64_t)(d * SCALING_FACTOR);
@@ -191,23 +180,6 @@ double activation(double theta){
 	//test(U,V,Z);
 	double fout;
 
-<<<<<<< Updated upstream
-int main(){
-	srand(time(0));
-	
-	
-	//====
-	double U = 2.21;
-	double V = 1.99;
-	double Z = U * V;
-	//===
-	test(U,V,Z);
-
-	double fout;
-
-	double theta = 0.62;
-=======
->>>>>>> Stashed changes
 	double delta = theta + 0.5;
 	double gamma = theta - 0.5;
 	double delta_shares[2];
@@ -229,73 +201,6 @@ int main(){
 	double rdelta_0 = mult(0, r_shares[0], delta_shares[0], E, F, Z_shares[0]);
 	// Party 1
 	double rdelta_1 = mult(1, r_shares[1], delta_shares[1], E, F, Z_shares[1]);
-<<<<<<< Updated upstream
-
-	double rdelta = rec(rdelta_0, rdelta_1);
-	//cout<< "rdelta: "<< rdelta <<" = "<< rdelta_0 <<" + "<< rdelta_1 << endl;
-	cout<<"theta (floating): "<<theta<<", delta: "<<delta<<", rdelta: "<< rdelta <<endl;
-
-	// ====================
-	uint64_t thetaint = floattouint64(theta);
-	uint64_t deltaint = floattouint64(delta);
-	uint64_t gammaint = floattouint64(gamma);
-	uint64_t deltaint_shares[2];
-	deltaint_shares[0] = floattouint64(delta_shares[0]);
-	deltaint_shares[1] = floattouint64(delta_shares[1]);
-	uint64_t gammaint_shares[2];
-	gammaint_shares[0] = floattouint64(gamma_shares[0]);
-	gammaint_shares[1] = floattouint64(gamma_shares[1]);
-
-	uint64_t rint = floattouint64(r);
-	uint64_t rint_shares[2];
-	rint_shares[0] = floattouint64(r_shares[0]);
-	rint_shares[1] = floattouint64(r_shares[1]);
-
-	uint64_t Zint_shares[2];
-	//share(Zint, Zint_shares);
-	Zint_shares[0] = floattouint64(Z_shares[0]);
-	Zint_shares[1] = floattouint64(Z_shares[1]);
-	//uint64_t Eint = num1int - Uint;
-	//uint64_t Fint = num2int - Vint;
-	uint64_t Eint = floattouint64(E);
-	uint64_t Fint = floattouint64(F);
-	// Party 0
-	uint64_t rdeltaint_0 = mult(0, rint_shares[0], deltaint_shares[0], Eint, Fint, Zint_shares[0]);
-	// Party 1
-	uint64_t rdeltaint_1 = mult(1, rint_shares[1], deltaint_shares[1], Eint, Fint, Zint_shares[1]);
-	
-	rdeltaint_0 = truncate(rdeltaint_0, SCALING_FACTOR);
-	rdeltaint_1 = truncate(rdeltaint_1, SCALING_FACTOR);
-
-	cout<< "theta (uint): "<< uint64tofloat(thetaint) <<", delta: "<<uint64tofloat(deltaint)<<", rdelta: "<< uint64tofloat(rdeltaint_0 + rdeltaint_1) <<endl;
-	cout<<"========="<<endl;
-	
-	
-	if (rdelta < 0) fout = 0;
-	else
-	{
-		double s = 3.0; 
-		double s_shares[2];
-		share(s, s_shares);
-		//cout<< "s: "<< s <<" = "<< s_shares[0] <<" + "<< s_shares[1] << endl;
-
-		E = s - U;
-		F = gamma - V;
-		// Party 0
-		double sgamma_0 = mult(0, s_shares[0], gamma_shares[0], E, F, Z_shares[0]);
-		// Party 1
-		double sgamma_1 = mult(1, s_shares[1], gamma_shares[1], E, F, Z_shares[1]);
-		
-		double sgamma = rec(sgamma_0, sgamma_1);
-		//cout<< "sgamma: "<< sgamma <<" = "<< sgamma_0 <<" + "<< sgamma_1 << endl;
-		//cout<<"theta: "<<theta<<", gamma: "<<gamma<<", sgamma: "<< sgamma <<endl;
-		if (sgamma < 0) fout = theta + 0.5;
-		else fout = 1;
-
-	}
-
-	cout<<"Final: theta: "<<theta<<", output: "<<fout<<endl;
-=======
 
 	double rdelta = rec(rdelta_0, rdelta_1);
 	//cout<< "rdelta: "<< rdelta <<" = "<< rdelta_0 <<" + "<< rdelta_1 << endl;
@@ -375,7 +280,6 @@ int main(){
   uint64_t num1 = floattouint64(out_shares[0]);
   uint64_t num2 = floattouint64(out_shares[1]);
   cout<<"After activation:"<< uint64tofloat(num1 + num2) <<endl<<endl;
->>>>>>> Stashed changes
 	return 0;
 }
 
