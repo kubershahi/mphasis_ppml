@@ -30,7 +30,7 @@ uint64_t floattouint64(double a)
   uint64_t res;
   if ( a >= 0)
   {
-    res = (a * SCALING_FACTOR);
+    res = (uint64_t) (a * SCALING_FACTOR);
     // cout<< res << " is positive"<<endl;
   }
   else
@@ -41,7 +41,6 @@ uint64_t floattouint64(double a)
   }
   return res;
 }
-
 
 // function that converts double Matrix to unit64 Matrix
 MatrixXi64 floattouint64(MatrixXd A)
@@ -76,14 +75,15 @@ double uint64tofloat(uint64_t a)
   double res;
   if (a & (1UL << 63))
   {
-    res = -((double) pow(2,64) - a)/SCALING_FACTOR;
-    //cout<< res(i,j) << " is negative"<<endl;
+    res = - ((double) pow(2,64) - a)/SCALING_FACTOR;
+    //cout<< res << " is negative"<<endl;
   }
   else
   {
     res = ((double) a)/SCALING_FACTOR;
-    //cout<< res(i,j) << " is positive"<<endl;
+    //cout<< res << " is positive"<<endl;
   }
+
   return res;
 }
 
@@ -145,20 +145,21 @@ MatrixXi64 rec(MatrixXi64 A, MatrixXi64 B)
 }
 
 
-// function that truncates integer values
 uint64_t truncate(uint64_t a, int factor)
-{ 
+{
   uint64_t res;
+
   if (a & (1UL << 63))
   {
-    res = (uint64_t) pow(2,64) - ((uint64_t) pow(2,64) - a)/factor;
-    //cout << res << " is negative"<<endl;
+    res = (uint64_t) pow(2,64) - ( (uint64_t)pow(2,64) - a)/factor;
+    //cout<< res(i,j) << " is negative"<<endl;
   }
   else
   {
     res = a/factor;
-    //cout<< res << " is positive"<<endl;
+    //cout<< res(i,j) << " is positive"<<endl;
   }
+
   return res;
 }
 
@@ -166,7 +167,6 @@ uint64_t truncate(uint64_t a, int factor)
 MatrixXi64 truncate(MatrixXi64 A, int factor)
 {
 
-  
   MatrixXi64 res(A.rows(),A.cols());
   for (int i = 0; i < A.rows(); i++)
   {
@@ -190,98 +190,62 @@ MatrixXi64 truncate(MatrixXi64 A, int factor)
 }
 
 
-// function that truncates the shares
-uint64_t truncate_share(uint64_t a, int factor, int i)
-{
-  uint64_t res;
-  if (i == 0){
-    res = truncate(a, SCALING_FACTOR); // truncation for 0th share
-  }
-  else{ 
-    res = (uint64_t) pow(2,64) - truncate( (uint64_t) pow(2,64) - a, SCALING_FACTOR); // truncation for 1st share
-  }
-
-  return res;
-}
-
 // ==================================
 
 int main(){
 
-  double XX = 10.15723545348;
-  double YY = -5.23423452345;
-  double ZZ = XX * YY;
+  double X = -10.15723545348;
+  double Y = 5.23423452345;
 
   cout << fixed;
-  cout << endl << "Z (floating arithmetic): " << ZZ << endl << endl;
+  cout << endl << "X: " << X << endl;
+  cout << "Y: " << Y << endl;
 
-  uint64_t XX_i = floattouint64(XX); // mapping XX to integer
-  uint64_t YY_i = floattouint64(YY); // mapping YY to integer
+  double Z = X * Y;
+  cout << endl << "Z (X * Y: floating arithmetic): " << Z << endl << endl;
+
+  uint64_t X_i = floattouint64(X); // mapping X to integer
+  uint64_t Y_i = floattouint64(Y); // mapping Y to integer
 
   // no secret sharing setting
-  cout << "=== No Secret Sharing Setting (just mapping & truncation) ==="<<endl << endl;
+  cout << "=== No Secret Sharing Setting (mapping, mulitplying, truncating, and reverse mapping) ==="<<endl << endl;
 
-  uint64_t ZZ_i = XX_i * YY_i;      // multiplying X and Y
-  uint64_t ZZ_t = truncate(ZZ_i, SCALING_FACTOR); // truncating Z
-  cout << "Z truncated (unshared setting): " << ZZ_t << endl;
-  double ZZ_f = uint64tofloat(ZZ_t);                 // mapping Z back to double
+  uint64_t Z_i = X_i * Y_i;      // multiplying X and Y
+  uint64_t Z_t = truncate(Z_i, SCALING_FACTOR); // truncating Z
+  // cout << "Z truncated (unshared setting): " << Z_t << endl;
+  
+  double Z_f = uint64tofloat(Z_t);                 // mapping Z back to double
 
-  cout << "Z (unshared setting): " << ZZ_f << endl << endl;
+  cout << "Z (unshared setting): " << Z_f << endl << endl;
 
   // secret sharing setting
-  cout << "=== Secret Sharing Setting ==="<<endl << endl;
+  cout << "=== Secret Sharing Setting (creating shares of X and Y, multiplying and then truncating them, then recreating Z) ==="<<endl << endl;
 
   uint64_t shares[2];
-  share(XX_i, shares);               // creating shares of XX
-  uint64_t XX_i0 = shares[0];
-  uint64_t XX_i1 = shares[1];
+  share(X_i, shares);               // creating shares of XX
+  uint64_t X_i0 = shares[0];
+  uint64_t X_i1 = shares[1];
 
-  share(YY_i, shares);               // creating shares of XX
-  uint64_t YY_i0 = shares[0];
-  uint64_t YY_i1 = shares[1];
+  share(Y_i, shares);               // creating shares of XX
+  uint64_t Y_i0 = shares[0];
+  uint64_t Y_i1 = shares[1];
 
-  uint64_t ZZ_i0 = XX_i0 * YY_i0 + XX_i0 * YY_i1;  // 0th share of Z
-  uint64_t ZZ_i1 = XX_i1 * YY_i0 + XX_i1 * YY_i1;  // 1st share of Z
-
-  // // without truncation of shares, recreating Z first and then truncation
-  // uint64_t ZZ_rec = rec(ZZ_i0, ZZ_i1);
-  // uint64_t ZZ_trun = truncate(ZZ_rec, SCALING_FACTOR);
-  // cout << endl << "Z truncated (shared setting) " << ZZ_trun << endl;
-  // double ZZ_sf = uint64tofloat(ZZ_trun);
-
-  // cout << "Z (shares recreated, then truncated): " << ZZ_sf << endl;
+  uint64_t Z_i0 = X_i0 * Y_i0 + X_i0 * Y_i1;  // 0th share of Z
+  uint64_t Z_i1 = X_i1 * Y_i0 + X_i1 * Y_i1;  // 1st share of Z
 
   // truncating both the shares, and then recreating
-  uint64_t ZZ_i0_t = truncate_share(ZZ_i0, SCALING_FACTOR, 0);
-  cout << "Truncated 0th share of Z: " << ZZ_i0_t << endl;
-  uint64_t ZZ_i1_t = truncate_share(ZZ_i1, SCALING_FACTOR, 1);
-  cout << "Truncated 1st share of Z (treating as negative representation): " << ZZ_i1_t << endl;
+  uint64_t Z_i0_t = truncate(Z_i0, SCALING_FACTOR);
+  // cout << "Truncated 0th share of Z: " << Z_i0_t << endl;
 
-  // //normal truncation on first share
-  // uint64_t ZZ_i1_nt = truncate(ZZ_i1, SCALING_FACTOR);
-  // cout << "Truncated 1st share of Z (normal) : " << ZZ_i1_nt << endl;
+  uint64_t Z_i1_t = truncate(Z_i1, SCALING_FACTOR);
+  // cout << "Truncated 1st share of Z: " << Z_i1_t << endl;
 
-  uint64_t ZZ_r = rec(ZZ_i0_t, ZZ_i1_t);
-  cout << endl << "Z truncated (shared setting): " << ZZ_r << endl;
 
-  // uint64_t ZZ_r1 = rec(ZZ_i0_t, ZZ_i1_t);
-  // cout << endl << "Z truncated normally (shared setting) " << ZZ_r1 << endl;
+  uint64_t Z_sha_r = rec(Z_i0_t, Z_i1_t);
+  // cout << endl << "Z truncated (shared setting): " << Z_sha_r << endl;
 
-  double ZZ_shaf = uint64tofloat(ZZ_r);
-  cout << "Z (shares truncated, then recreated): " << ZZ_shaf << endl;
-
-  //truncating first share manually according to paper
-  uint64_t ZZ_i1_sub = (uint64_t) ((uint64_t) pow(2,64) - ZZ_i1)/SCALING_FACTOR;
-  uint64_t ZZ_i1_trun_test = (uint64_t) pow(2,64) - ZZ_i1_sub;
-  
-  cout << endl << "Truncated 1st share of Z (treating as postive representation): " << ZZ_i1_trun_test << endl;
-
-  uint64_t ZZ_rp = (ZZ_i0_t + ZZ_i1_trun_test);
-  cout << endl << "Z truncated (shared setting): " << ZZ_rp << endl;
-  
-  double ZZ_shaf_p = uint64tofloat(ZZ_rp);
-  cout << "Z (shares truncated, then recreated): " << ZZ_shaf_p << endl;
-
+  double Z_sha_f = uint64tofloat(Z_sha_r);
+  cout << "Z (shared setting): " << Z_sha_f << endl;
 
   return 0;
 }
