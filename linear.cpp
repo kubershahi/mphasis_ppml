@@ -61,8 +61,8 @@ int main(){
 
   if (selection == 1){ // loading data for MNIST dataset
   
-  :: N = 60000; // 10000
-  :: N_test = 10000; // 1000
+  :: N = 10000; // 10000
+  :: N_test = 1000; // 1000
   :: d = 784; //784
   :: B = 128; //128
   :: NUM_EPOCHS = 4;
@@ -156,8 +156,8 @@ int main(){
   }
   else if (selection == 3){ // loading Binary MNIST dataset
 
-  :: N = 60000; // 10000
-  :: N_test = 10000; // 1000
+  :: N = 10000; // 10000
+  :: N_test = 1000; // 1000
   :: d = 784; //784
   :: B = 128; //128
   :: NUM_EPOCHS = 4;

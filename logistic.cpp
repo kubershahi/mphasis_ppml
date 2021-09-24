@@ -59,7 +59,7 @@ int main(){
 
   if (selection == 1){ // loading Binary MNIST dataset
 
-    :: N = 60000; // 10000
+    :: N = 30000; // 10000
     :: N_test = 10000; // 1000
     :: d = 784; //784
     :: B = 128; //128
@@ -137,22 +137,22 @@ int main(){
   cout << endl;
   cout << "Testing Regression Model: " << TestLogisticModel(selection, ideal_w, X_testdata, Y_testdata) << endl;
   
-  // cout << endl;
-  // cout << "====================================="<<endl;
-  // cout << "PP LINEAR REGRESSION (UINT-64 Inputs):"<<endl;
-  // cout << "====================================="<<endl<<endl;
+  cout << endl;
+  cout << "====================================="<<endl;
+  cout << "PP LINEAR REGRESSION (UINT-64 Inputs):"<<endl;
+  cout << "====================================="<<endl<<endl;
 
-  // // conerting doubles to 64-bit integers
-  // MatrixXi64 X_ = floattouint64(X); // double to uint_64
-  // MatrixXi64 Y_ = floattouint64(Y); // double to uint_64
-  // MatrixXi64 w_ = floattouint64(w); // double to uint_64
+  // conerting doubles to 64-bit integers
+  MatrixXi64 X_ = floattouint64(X); // double to uint_64
+  MatrixXi64 Y_ = floattouint64(Y); // double to uint_64
+  MatrixXi64 w_ = floattouint64(w); // double to uint_64
 
-  // MatrixXi64 pp_w_i = logisticRegression(X_,Y_,w_);
-  // MatrixXd pp_w = uint64tofloat(pp_w_i); // descaling
+  MatrixXi64 pp_w_i = logisticRegression(X_,Y_,w_);
+  MatrixXd pp_w = uint64tofloat(pp_w_i); // descaling
 
-  // // cout<<"Final weights (under Privacy Preserving functionality) are:\n "<< pp_w << endl;
+  // cout<<"Final weights (under Privacy Preserving functionality) are:\n "<< pp_w << endl;
 
-  // cout << endl;
-  // cout << "Testing Regression Model: " << TestLogisticModel(selection, pp_w, X_testdata, Y_testdata) << endl;
+  cout << endl;
+  cout << "Testing Regression Model: " << TestLogisticModel(selection, pp_w, X_testdata, Y_testdata) << endl;
 
 }

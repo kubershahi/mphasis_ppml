@@ -2,7 +2,7 @@
 #define SECML_DEFINES_HPP
 #include <Eigen/Dense>
 
-#define SCALING_FACTOR 8192 // Precision of 13 bits
+#define SCALING_FACTOR 8192// Precision of 13 bits = 8192
 
 typedef Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> MatrixXi64;
 typedef Eigen::Matrix<uint64_t, 1, Eigen::Dynamic, Eigen::RowMajor> RowVectorXi64;

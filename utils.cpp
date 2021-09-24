@@ -248,3 +248,4 @@ string TestLogisticModel(int s, MatrixXd w, MatrixXd X_test, MatrixXd Y_test)
 
   return res;
 }
+
