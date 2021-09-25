@@ -8,11 +8,17 @@ CC = g++
 # CFLAGS  = -g -Wall
 
 
-logistic:  read_data.o utils.o logistic_regression.o logistic.o
+logistic: read_data.o utils.o logistic_regression.o logistic.o
 	$(CC) $(CFLAGS) read_data.o utils.o logistic_regression.o logistic.o -o logistic
+
+linear: read_data.o utils.o linear_regression.o linear.o
+	$(CC) $(CFLAGS) read_data.o utils.o linear_regression.o linear.o -o linear
 
 logistic_regression.o:	logistic_regression.cpp logistic_regression.hpp
 	$(CC) $(CFLAGS) -c logistic_regression.cpp
+
+linear_regression.o:	linear_regression.cpp linear_regression.hpp
+	$(CC) $(CFLAGS) -c linear_regression.cpp
 
 utils.o:	utils.cpp utils.hpp
 	$(CC) $(CFLAGS) -c utils.cpp
