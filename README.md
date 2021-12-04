@@ -15,6 +15,7 @@ cd mphasis_ppml
 make linear
 ./linear
 
+// for logitic regression
 make logistic
 ./logistic
 
