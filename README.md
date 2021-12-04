@@ -10,8 +10,14 @@
 ```
 git clone https://github.com/kubershahi/mphasis_ppml.git
 cd mphasis_ppml
-make 
-./file
+
+// for linear regression
+make linear
+./linear
+
+make logistic
+./logistic
+
 ```
 ### Note
 This is under active development. Major code refragmentation is to be expected soon.
