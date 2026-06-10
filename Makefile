@@ -1,38 +1,53 @@
-# Makefile variables for the compiler and compiler flags
-# to use Makefile variables later in the Makefile: $()
-#
-#  -g    adds debugging information to the executable file
-#  -Wall turns on most, but not all, compiler warnings
-#
-CC = g++
-# CFLAGS  = -g -Wall
+# Privacy-Preserving Machine Learning — SecureML (C++)
+# Build from the repository root so dataset paths resolve correctly.
 
+CXX      ?= g++
+# Set EIGEN_INCLUDE if Eigen is not on the default compiler search path.
+# e.g. make EIGEN_INCLUDE=/opt/homebrew/include/eigen3
+EIGEN_INCLUDE ?=
+EIGEN_FLAGS   := $(if $(EIGEN_INCLUDE),-I$(EIGEN_INCLUDE),)
+CXXFLAGS      ?= -std=c++14 -O2 -Wall -Isecureml/include $(EIGEN_FLAGS)
+BUILD    := build
+BIN      := bin
 
-logistic: read_data.o utils.o logistic_regression.o logistic.o
-	$(CC) $(CFLAGS) read_data.o utils.o logistic_regression.o logistic.o -o logistic
+COMMON_OBJS := \
+	$(BUILD)/read_data.o \
+	$(BUILD)/utils.o
 
-linear: read_data.o utils.o linear_regression.o linear.o
-	$(CC) $(CFLAGS) read_data.o utils.o linear_regression.o linear.o -o linear
+.PHONY: all linear logistic clean
 
-logistic_regression.o:	logistic_regression.cpp logistic_regression.hpp
-	$(CC) $(CFLAGS) -c logistic_regression.cpp
+all: linear logistic
 
-linear_regression.o:	linear_regression.cpp linear_regression.hpp
-	$(CC) $(CFLAGS) -c linear_regression.cpp
+linear: $(BIN)/linear
 
-utils.o:	utils.cpp utils.hpp
-	$(CC) $(CFLAGS) -c utils.cpp
+logistic: $(BIN)/logistic
 
-read_data.o:	read_data.cpp read_data.hpp
-	$(CC) $(CFLAGS) -c read_data.cpp
+$(BIN)/linear: $(COMMON_OBJS) $(BUILD)/linear_regression.o $(BUILD)/linear.o | $(BIN)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
-linear.o:	linear.cpp read_data.hpp utils.hpp linear_regression.hpp defines.hpp
-	$(CC) $(CFLAGS) -c linear.cpp
+$(BIN)/logistic: $(COMMON_OBJS) $(BUILD)/logistic_regression.o $(BUILD)/logistic.o | $(BIN)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
-logistic.o:	logistic.cpp read_data.hpp utils.hpp logistic_regression.hpp defines.hpp
-	$(CC) $(CFLAGS) -c logistic.cpp
+$(BUILD)/read_data.o: secureml/src/read_data.cpp secureml/include/read_data.hpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# To start over from scratch, type 'make clean'. This removes the executable file, 
-# as well as old .o objectfiles and *~ backup files:
-clean: 
-	$(RM) linear logistic file *.o *~
+$(BUILD)/utils.o: secureml/src/utils.cpp secureml/include/utils.hpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD)/linear_regression.o: secureml/src/linear_regression.cpp secureml/include/linear_regression.hpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD)/logistic_regression.o: secureml/src/logistic_regression.cpp secureml/include/logistic_regression.hpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD)/linear.o: secureml/src/linear.cpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD)/logistic.o: secureml/src/logistic.cpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD) $(BIN):
+	mkdir -p $@
+
+clean:
+	rm -rf $(BUILD) $(BIN)

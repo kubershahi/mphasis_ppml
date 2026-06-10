@@ -16,4 +16,4 @@ MatrixXi64 idealLogisticRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w);
 MatrixXd logisticRegression(MatrixXd X, MatrixXd Y, MatrixXd w); 
 MatrixXi64 logisticRegression(MatrixXi64 X, MatrixXi64 Y, MatrixXi64 w);
 
-#endif // SECML_UTIL_HPP
+#endif // SECML_LOGISTIC_REGRESSION_HPP
