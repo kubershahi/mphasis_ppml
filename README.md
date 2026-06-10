@@ -1,6 +1,6 @@
 # Privacy-Preserving Machine Learning (PPML)
 
-Research implementation and evaluation of secure multi-party machine learning protocols, developed during a **Research Internship at Mphasis Lab, Ashoka University** (May–August 2021).
+Research implementation and evaluation of secure multi-party machine learning protocols, developed during a **research internship at Mphasis Lab, Ashoka University** (May–August 2021).
 
 **Advisor:** Prof. Mahavir Jhawar
 
@@ -121,16 +121,6 @@ python3 main2.py   # extended protocol tests
 
 ---
 
-## Research Context
-
-> Researched and implemented Privacy-Preserving Machine Learning (PPML) protocols such as SecureML (C++) and BLAZE (Python), evaluating each protocol's efficiency and security for sensitive datasets.
->
-> Co-led the development of a secure, optimized PPML protocol for business-specific needs under Prof. Mahavir Jhawar's guidance, improving the protocol's reliability and applicability for real-world solutions.
-
-This codebase reflects that internship work: reference implementations for benchmarking, protocol primitives for experimentation, and exploratory extensions in `novel/` and `experiments/`.
-
----
-
 ## Limitations
 
 This is **research prototype code**, not a production-ready secure ML framework:
@@ -147,7 +137,3 @@ This is **research prototype code**, not a production-ready secure ML framework:
 Released under the [MIT License](LICENSE).
 
 ---
-
-## Acknowledgments
-
-This work was conducted at **Mphasis Lab, Ashoka University** under the supervision of **Prof. Mahavir Jhawar**. Thanks to the Mphasis Lab team for guidance and resources during the summer 2021 internship.
