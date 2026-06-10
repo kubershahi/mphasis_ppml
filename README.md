@@ -1,10 +1,15 @@
 # Privacy-Preserving Machine Learning (PPML)
 
+[![Mphasis Lab](https://img.shields.io/badge/Mphasis%20Lab-Ashoka%20University-E11D48)]()
+[![Research](https://img.shields.io/badge/Research-Internship%202021-6B46C1)]()
+[![PPML](https://img.shields.io/badge/Domain-Privacy--Preserving%20ML-0F766E)]()
+[![C++](https://img.shields.io/badge/C++-14-00599C?logo=cplusplus&logoColor=white)](secureml/)
+[![Python](https://img.shields.io/badge/Python-3.7+-3776AB?logo=python&logoColor=white)](blaze/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Research implementation and evaluation of secure multi-party machine learning protocols, developed during a **research internship at Mphasis Lab, Ashoka University** (May–August 2021).
 
 **Advisor:** Prof. Mahavir Jhawar
-
----
 
 ## Overview
 
