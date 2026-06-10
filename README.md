@@ -135,5 +135,3 @@ This is **research prototype code**, not a production-ready secure ML framework:
 ## License
 
 Released under the [MIT License](LICENSE).
-
----
